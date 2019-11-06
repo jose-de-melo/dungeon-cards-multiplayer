@@ -14,6 +14,7 @@ router.get('/', (req, res)=>{
     res.send({
         ok: true,
         //retornando o id do usuario
+        //caso seja necessario identificar qual usuario esta executando a requisiçã
         user: req.userId
     });
 });

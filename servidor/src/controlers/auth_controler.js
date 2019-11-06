@@ -56,6 +56,8 @@ router.post('/autenticate', async (req,res)=> {
         user, 
         token: generateToken({id : user.id}) 
     });
+
+    //alterar usuario
 });
 
 module.exports = app => app.use('/users', router);
