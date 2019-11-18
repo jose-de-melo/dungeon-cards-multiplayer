@@ -9,9 +9,7 @@ const CardSchema = mongoose.Schema({
     },
     image: {
         type: String,
-        unique: true,
-        required: true,
-        lowercase: true,
+        required: true
     },
     life : {
         type: Number,
