@@ -1,9 +1,38 @@
 import  React, {useState} from 'react';
-import { Text, TextInput, TouchableOpacity, StyleSheet, View, StatusBar } from 'react-native'
-import { bold } from 'ansi-colors';
+import { Keyboard, ToastAndroid, Text, TextInput, TouchableOpacity, StyleSheet, View, StatusBar } from 'react-native'
+
 
 export default function SignUp({navigation}){
-    const [user, setUser, password, setPassword, email, setEmail] = useState('')
+    const [user, setUser] = useState('')
+    const [password, setPassword] = useState('')
+    const [confirmPass, setConfirmPass] = useState('')
+    const [email, setEmail] = useState('')
+    const [checkPass, setCheckPass] = useState(true)
+
+    function showToast(message){
+        ToastAndroid.showWithGravityAndOffset(
+            message,
+            ToastAndroid.LONG,
+            ToastAndroid.BOTTOM,
+            0,
+            30,
+        );
+    }
+
+
+    function createUser(){
+        Keyboard.dismiss()
+
+        if(password != confirmPass){
+            setCheckPass(false)
+            setConfirmPass('')
+            showToast("As senhas não batem!")
+        }else{
+            setCheckPass(true)
+        }
+
+        
+    }
 
     return(
         <View style={styles.container}>
@@ -11,7 +40,8 @@ export default function SignUp({navigation}){
             <Text style={styles.title}>Sign Up</Text>
             
             <Text style={styles.inputText}>Nickname</Text>
-            <TextInput 
+            <TextInput
+                
                 placeholder="Nickname"
                 style={styles.input}
                 autoCapitalize="none"
@@ -28,8 +58,8 @@ export default function SignUp({navigation}){
                 style={styles.input}
                 autoCapitalize="none"
                 autoCorrect={false}
-                value={password}
-                onChangeText={setPassword}
+                value={email}
+                onChangeText={setEmail}
             />
 
             <Text style={styles.inputText}>Password</Text>
@@ -47,15 +77,15 @@ export default function SignUp({navigation}){
             <TextInput
                 secureTextEntry={true}
                 placeholder="Password"
-                style={styles.input}
+                style={checkPass ? styles.input : styles.inputError}
                 autoCapitalize="none"
                 autoCorrect={false}
-                value={password}
-                onChangeText={setPassword}
+                value={confirmPass}
+                onChangeText={setConfirmPass}
             />
 
 
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={createUser}>
                 <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
 
@@ -65,11 +95,6 @@ export default function SignUp({navigation}){
             >
                 <Text style={styles.link}>Cancel</Text>
             </TouchableOpacity>
-
-
-
-
-
         </View>
     );
 }
@@ -140,6 +165,16 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontSize: 15,
         fontWeight: 'bold'
+    },
+
+    inputError:{
+        height: 46,
+        width: 250,
+        backgroundColor: '#fafafa',
+        borderColor: '#d32f2f',
+        borderWidth:2,
+        borderRadius:4,
+        paddingHorizontal:15,
     }
 
 
