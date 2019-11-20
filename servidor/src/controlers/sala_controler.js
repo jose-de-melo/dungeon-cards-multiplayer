@@ -67,10 +67,14 @@ router.get('/iniciar/:id_partida', async (req, res) => {
 
 });
 
-router.get('/', async (req, res) => {
-    const partida =  req.params.id_partida
-    
+function randOrd() {
+    return (Math.round(Math.random())-0.5);
+}
 
+router.get('/rolar_dado', async (req, res) => {
+    const dado =  [1, 2, 2, 3, 3, 3, 4, 4, 5, 6]
+    dado.sort.sort(randOrd)
+    return res.send({ jogadas : dado[0]}) 
 });
 
 router.post('/left', async (req,res)=> {
