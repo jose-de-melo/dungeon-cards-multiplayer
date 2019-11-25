@@ -15,7 +15,7 @@ for(i=0; i<14;i++){
     coin.level = 0;
     coin.live = 0;
     coin.damage = 0;
-    coin.bounty = 0;
+    coin.bounty = 1;
     lista.push(coin);
 }
 
@@ -28,7 +28,7 @@ for(i=0; i<6;i++){
     potion.level = 0;
     potion.live = 0;
     potion.damage = 0;
-    potion.bounty = 0;
+    potion.bounty = 2;
     lista.push(potion);
 }
 
@@ -39,10 +39,10 @@ for(i=0; i<8;i++){
 
     monster.name = monstros[i].replace(".png","");
     monster.image = monstros[i];
-    monster.level = 0;
-    monster.live = 0;
-    monster.damage = 0;
-    monster.bounty = 0;
+    monster.level = 1;
+    monster.live = 5;
+    monster.damage = 2;
+    monster.bounty = 3;
     
     lista.push(monster);
 }
@@ -104,6 +104,18 @@ router.post('/join', async (req,res)=> {
 //Esse é o metodo q vai iniciar a partida
 router.get('/iniciar/:id_partida', async (req, res) => {
     const partida =  req.params.id_partida
+
+    for(p in partida.players){
+        arma = new Card();
+        arma.name = p.heroi;
+        arma.image = p.heroi + ".png";
+        arma.level = 0;
+        arma.live = 0;
+        arma.damage = 0;
+        arma.bounty = 0;
+        lista.push(arma);
+    }
+
     // Aqui ele tem o id da partida, so vai ter um mas ele vai estar fixo como 1.
     // 1  --  Ele precisa 1, usar um sort colocar os players de fomra aleatoria no vetor de players da sala
     // 2 -- Ele posiciona os players de acordo com a posição no vetor, [1,1], [1,4], [4,1], [4,4].
