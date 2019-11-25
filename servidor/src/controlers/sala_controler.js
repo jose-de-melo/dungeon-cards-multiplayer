@@ -1,5 +1,52 @@
 const express = require('express');
 const Sala = require('../models/sala');
+const Card = require('../models/card');
+
+var lista = [];
+
+/// 8 monstros, 6 potes, 4 armas, 14 moedas
+
+//Moedas
+for(i=0; i<14;i++){
+    coin = new Card();
+
+    coin.name = "moeda";
+    coin.image = "coin.png";
+    coin.level = 0;
+    coin.live = 0;
+    coin.damage = 0;
+    coin.bounty = 0;
+    lista.push(coin);
+}
+
+//Potes
+for(i=0; i<6;i++){
+    potion = new Card();
+
+    potion.name = "potion";
+    potion.image = "potion.png";
+    potion.level = 0;
+    potion.live = 0;
+    potion.damage = 0;
+    potion.bounty = 0;
+    lista.push(potion);
+}
+
+//Monstros
+var monstros = ["alien.png","aranha.png","cogumelo.png","esqueleto.png","javali.png","medusa.png","morcego.png","zumbi.png"];
+for(i=0; i<8;i++){
+    monster = new Card();
+
+    monster.name = monstros[i].replace(".png","");
+    monster.image = monstros[i];
+    monster.level = 0;
+    monster.live = 0;
+    monster.damage = 0;
+    monster.bounty = 0;
+    
+    lista.push(monster);
+}
+
 
 const router = express.Router();
 
