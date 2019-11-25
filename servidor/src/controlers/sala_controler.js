@@ -93,7 +93,14 @@ router.post('/join', async (req,res)=> {
         return res.status(400).send({ error: "Esta sala está cheia.", id_sala}) 
 
     sala.players.push({nickname, socket, heroi})
-
+    arma = new Card();
+    arma.name = heroi;
+    arma.image = heroi + ".png";
+    arma.level = 0;
+    arma.live = 0;
+    arma.damage = 0;
+    arma.bounty = 0;
+    lista.push(arma);
     const resp = await Sala.update({_id: sala.id }, sala)
     if(!resp.nModified) return res.status(400).send({ error: "Não foi possível entrar na sala.", id_sala})
 
@@ -104,17 +111,7 @@ router.post('/join', async (req,res)=> {
 //Esse é o metodo q vai iniciar a partida
 router.get('/iniciar/:id_partida', async (req, res) => {
     const partida =  req.params.id_partida
-
-    for(p in partida.players){
-        arma = new Card();
-        arma.name = p.heroi;
-        arma.image = p.heroi + ".png";
-        arma.level = 0;
-        arma.live = 0;
-        arma.damage = 0;
-        arma.bounty = 0;
-        lista.push(arma);
-    }
+    partida.players.sort(randOrd);
 
     // Aqui ele tem o id da partida, so vai ter um mas ele vai estar fixo como 1.
     // 1  --  Ele precisa 1, usar um sort colocar os players de fomra aleatoria no vetor de players da sala
