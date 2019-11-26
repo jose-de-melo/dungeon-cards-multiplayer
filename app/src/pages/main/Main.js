@@ -1,7 +1,14 @@
 import React from 'react';
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar } from 'react-native'
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, AsyncStorage } from 'react-native'
 
 export default function Main(){
+
+    const logout = async () => {
+        await AsyncStorage.removeItem("token")
+    }
+
+    logout()
+
     return( 
         <View style={styles.container}>
             <StatusBar translucent backgroundColor={styles.container.backgroundColor}/>

@@ -31,6 +31,8 @@ export default function SignUp({navigation}){
             setCheckPass(true)
         }
 
+
+
         
     }
 
@@ -73,7 +75,7 @@ export default function SignUp({navigation}){
                 onChangeText={setPassword}
             />
 
-            <Text style={styles.inputText}>Confirm your password</Text>
+            <Text style={styles.inputText}>Confirm password</Text>
             <TextInput
                 secureTextEntry={true}
                 placeholder="Password"

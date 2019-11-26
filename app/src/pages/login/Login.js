@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
 
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar } from 'react-native'
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, AsyncStorage, Image } from 'react-native'
 
 import api from '../../services/api'
 
 export default function Login({ navigation }){
     const [user, setUser, password, setPassword] = useState('')
+
+    const isLogged = async () => {
+        const token = await AsyncStorage.getItem("token")
+
+        if(token != null){
+            navigation.navigate("Main")
+        }
+    }
+
+    isLogged()
+
 
     async function handleLogin(){
         //const response = await api.post('/devs')
@@ -18,6 +29,12 @@ export default function Login({ navigation }){
     return(
         <View style={styles.container}>
             <StatusBar translucent backgroundColor={'#7e57c2'} />
+
+            <Image
+                style={styles.img}
+                source={require('../../images/hero.png')}
+            />
+
             <Text style={styles.text}>Dungeons</Text>
             <Text style={styles.text}>MMO</Text>
             <TextInput 
@@ -61,7 +78,12 @@ const styles = StyleSheet.create({
         padding: 30
     },
 
+    img: {
+        marginRight: 30
+    },
+
     text: {
+        marginTop: 10,
         color: '#fff',
         fontSize: 30,
         fontFamily: 'PressStart'
