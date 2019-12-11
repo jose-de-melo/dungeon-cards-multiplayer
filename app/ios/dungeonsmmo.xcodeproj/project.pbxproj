@@ -18,6 +18,7 @@
 		DF3153974821435E842212CC /* PressStart.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95FA8DF454D7437C91CB1141 /* PressStart.ttf */; };
 		E779642121AF4AE5A7FB9580 /* Start.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6880003FA3E147F2961F26EA /* Start.ttf */; };
 		BC75CDC8E8424FE887CA78C2 /* PressStart copy.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9D84166116624577B4A40745 /* PressStart copy.ttf */; };
+		BA7A1A62B338483792580743 /* hero.png in Resources */ = {isa = PBXBuildFile; fileRef = 33C83E6E9834453D80328C5F /* hero.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		95FA8DF454D7437C91CB1141 /* PressStart.ttf */ = {isa = PBXFileReference; name = "PressStart.ttf"; path = "../assets/fonts/PressStart.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		6880003FA3E147F2961F26EA /* Start.ttf */ = {isa = PBXFileReference; name = "Start.ttf"; path = "../assets/fonts/Start.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		9D84166116624577B4A40745 /* PressStart copy.ttf */ = {isa = PBXFileReference; name = "PressStart copy.ttf"; path = "../assets/fonts/PressStart copy.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		33C83E6E9834453D80328C5F /* hero.png */ = {isa = PBXFileReference; name = "hero.png"; path = "../assets/images/hero.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +171,7 @@
 				95FA8DF454D7437C91CB1141 /* PressStart.ttf */,
 				6880003FA3E147F2961F26EA /* Start.ttf */,
 				9D84166116624577B4A40745 /* PressStart copy.ttf */,
+				33C83E6E9834453D80328C5F /* hero.png */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -313,6 +316,7 @@
 				DF3153974821435E842212CC /* PressStart.ttf in Resources */,
 				E779642121AF4AE5A7FB9580 /* Start.ttf in Resources */,
 				BC75CDC8E8424FE887CA78C2 /* PressStart copy.ttf in Resources */,
+				BA7A1A62B338483792580743 /* hero.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
