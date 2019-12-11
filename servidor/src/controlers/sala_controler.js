@@ -62,8 +62,7 @@ router.get('/iniciar/:id_partida', async (req, res) => {
     // 2 -- Ele posiciona os players de acordo com a posição no vetor, [1,1], [1,4], [4,1], [4,4].
     // Criar um vetor de objetos Card, bolar uma logica pra distribuir armas, itens e monstros. ( pensei no seguinte, criar um vetor com moedas, monstros e pots, e colocar no final, os personagens e as armas)
     // Sort nesse vetor de item.
-    // Comunica com o socket pela 1 vez aqui, ja com a matriz pronta pra ser exibida.   
-    
+    // Comunica com o socket pela 1 vez aqui, ja com a matriz pronta pra ser exibida.       
 
 });
 
@@ -73,7 +72,7 @@ function randOrd() {
 
 router.get('/rolar_dado', async (req, res) => {
     const dado =  [1, 2, 2, 3, 3, 3, 4, 4, 5, 6]
-    dado.sort.sort(randOrd)
+    dado.sort(randOrd)
     return res.send({ jogadas : dado[0]}) 
 });
 
