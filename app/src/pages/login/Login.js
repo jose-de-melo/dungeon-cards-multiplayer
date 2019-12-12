@@ -14,27 +14,36 @@ export default function Login({ navigation }){
         const token = await AsyncStorage.getItem("token")
 
         if(token != null){
-            //navigation.navigate("Main")
+            navigation.navigate("Main")
         }
     }
 
     isLogged()
 
+    async function saveInfo(token, user) {
+        await AsyncStorage.setItem("token", "Bearer " + token)
+        await AsyncStorage.setItem("id", user._id)
+    }
+
 
     async function handleLogin(){
         Keyboard.dismiss()
 
+        
         await api.post('/users/authenticate',{
              "name": user,
              "password": password
-         }).then(response => {
-             alert(response)
-           })
-           .catch(error => {
-             alert(error)
-           })
-        
-        //navigation.navigate('Main')
+        })
+        .then(response => {
+            if(response.data.code == 200){
+                const { token, user } = response.data
+                saveInfo(token, user)
+                navigation.navigate('Main')
+            }
+          })
+        .catch(error => {
+            alert(error)
+        })
     }
 
 
