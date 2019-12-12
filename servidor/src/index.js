@@ -1,3 +1,8 @@
+const options = {
+    host: "localhost",
+    port: process.env.PORT || 3000
+};
+
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -15,5 +20,7 @@ app.get('/', (req, res) =>{
     res.send('Karai Borracha');
 });
 
-app.listen(3000);
+app.listen(options.port, function(){
+    console.log(`Servidor rodando na porta ${options.port}`)
+})
 
