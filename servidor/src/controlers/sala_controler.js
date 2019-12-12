@@ -91,21 +91,25 @@ router.delete('/:id', async (req,res)=> {
 
 */
 router.post('/join', async (req,res)=> {
-    const { nickname, socket, id_sala } = req.body;
+    const { nickname, socket} = req.body;
 
     //if(!sala) 
     //   return res.status(400).send({ error: "Sala não cadastrada.", id_sala}) 
 
     const nplayers = sala.players.length
     if(nplayers == 4)
-        return res.status(400).send({ error: "Esta sala está cheia.", id_sala}) 
+        return res.send({status:400,  error: "Esta sala está cheia."}) 
 
-    sala.players.push({nickname, socket})    
-
-    const resp = await Sala.update({_id: sala.id }, sala)
-    if(!resp.nModified) return res.status(400).send({ error: "Não foi possível entrar na sala.", id_sala})
+    sala.players.push({nickname, socket})   
+    
+    console.log("Cadastrando: "+ nickname+ "   Numero de jogadores:"+sala.players.length)
 
     return res.send({ status: "O player entrou na sala.", num_players: (nplayers+1)})
+});
+
+router.get('/', async (req, res) => {
+    console.log('karai borrachando');
+    return res.send('Karai borracha');
 });
 
 //Esse é o metodo q vai iniciar a partida
@@ -114,9 +118,9 @@ router.get('/iniciar', async (req, res) => {
     for(i=0; i<6;i++){
         lista.sort(randOrd);
         for(j=0; j<6;j++){
-           posicoes[i][j] = lista[j];
-           posicoes[i][j].x = i;
-           posicoes[i][j].x = j;
+           sala.posicoes[i][j] = lista[j];
+           sala.posicoes[i][j].x = i;
+           sala.posicoes[i][j].x = j;
         }
     }
 
@@ -268,5 +272,5 @@ router.post('/left', async (req,res)=> {
 });*/
 
 
-module.exports = app => app.use('/salas', router);
+module.exports = app => app.use('/game', router);
     
