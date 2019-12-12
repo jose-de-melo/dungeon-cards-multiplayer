@@ -1,40 +1,21 @@
 import React, { useState } from 'react';
 
-<<<<<<< HEAD
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar } from 'react-native'
-import AsyncStorage from '@react-native-community/async-storage';
-=======
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, AsyncStorage, Image } from 'react-native'
->>>>>>> 54d079cdef740448c288ac8af342ca70ab2b2b3a
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, Image } from 'react-native'
 
-import api from '../../services/api'
 
-export default function Login({ navigation }){
-    const [user, setUser, password, setPassword] = useState('')
+export default function Login({ navigation }) {
+    const [user, setUser,] = useState('')
 
-<<<<<<< HEAD
-=======
-    const isLogged = async () => {
-        const token = await AsyncStorage.getItem("token")
 
-        if(token != null){
-            navigation.navigate("Main")
-        }
-    }
-
-    isLogged()
-
->>>>>>> 54d079cdef740448c288ac8af342ca70ab2b2b3a
-
-    async function handleLogin(){
+    async function handleLogin() {
         //const response = await api.post('/devs')
-        
-        console.log({user})
+
+        console.log({ user })
         navigation.navigate('Main')
     }
 
 
-    return(
+    return (
         <View style={styles.container}>
             <StatusBar translucent backgroundColor={'#7e57c2'} />
 
@@ -45,7 +26,7 @@ export default function Login({ navigation }){
 
             <Text style={styles.text}>Dungeons</Text>
             <Text style={styles.text}>MMO</Text>
-            <TextInput 
+            <TextInput
                 placeholder="Nickname"
                 style={styles.input}
                 autoCapitalize="none"
@@ -64,15 +45,15 @@ export default function Login({ navigation }){
                 <Text style={styles.buttonText}>Sign In</Text>
             </TouchableOpacity>
 
-            <Text style={styles.createText}>Don't have account ? 
+            <Text style={styles.createText}>Don't have account ?
             </Text>
 
             <TouchableOpacity
-                onPress={() => navigation.navigate('SignUp') }
+                onPress={() => navigation.navigate('SignUp')}
             >
                 <Text style={styles.link}>Create here</Text>
             </TouchableOpacity>
-        </View> 
+        </View>
     );
 }
 
@@ -97,15 +78,15 @@ const styles = StyleSheet.create({
         fontFamily: 'PressStart'
     },
 
-    input:{
+    input: {
         height: 46,
         width: 250,
         backgroundColor: '#fafafa',
         borderColor: '#fafafa',
-        borderWidth:1,
-        borderRadius:4,
+        borderWidth: 1,
+        borderRadius: 4,
         marginTop: 20,
-        paddingHorizontal:15,
+        paddingHorizontal: 15,
     },
 
     button: {
@@ -119,19 +100,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         lineHeight: 12
-        
+
     },
 
     buttonText: {
         color: '#FFF',
         fontSize: 15,
-        
+
     },
 
     createText: {
         color: '#FFF',
-        marginTop:20,
-        fontSize:15,
+        marginTop: 20,
+        fontSize: 15,
 
     },
 

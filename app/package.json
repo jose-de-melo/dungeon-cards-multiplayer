@@ -32,7 +32,9 @@
   "jest": {
     "preset": "react-native"
   },
-  "rnpm":{
-    "assets":["./assets"]
+  "rnpm": {
+    "assets": [
+      "./assets"
+    ]
   }
 }
