@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, AsyncStorage, Image } from 'react-native'
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, Image, Keyboard } from 'react-native'
+import AsyncStorage from '@react-native-community/async-storage'
+
 
 import api from '../../services/api'
 
 export default function Login({ navigation }){
-    const [user, setUser, password, setPassword] = useState('')
+    const [user, setUser] = useState('')
+    const [password, setPassword] = useState('')
 
     const isLogged = async () => {
         const token = await AsyncStorage.getItem("token")
 
         if(token != null){
-            navigation.navigate("Main")
+            //navigation.navigate("Main")
         }
     }
 
@@ -19,10 +22,19 @@ export default function Login({ navigation }){
 
 
     async function handleLogin(){
-        //const response = await api.post('/devs')
+        Keyboard.dismiss()
+
+        await api.post('/users/authenticate',{
+             "name": user,
+             "password": password
+         }).then(response => {
+             alert(response)
+           })
+           .catch(error => {
+             alert(error)
+           })
         
-        console.log({user})
-        navigation.navigate('Main')
+        //navigation.navigate('Main')
     }
 
 
@@ -50,6 +62,8 @@ export default function Login({ navigation }){
                 secureTextEntry={true}
                 placeholder="Password"
                 style={styles.input}
+                value={password}
+                onChangeText={setPassword}
             />
 
             <TouchableOpacity onPress={handleLogin} style={styles.button}>
