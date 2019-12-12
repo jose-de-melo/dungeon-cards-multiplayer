@@ -4,6 +4,10 @@ const Card = require('../models/card');
 
 var lista = [];
 
+const sala = new Sala({
+    posicoes:[[],[],[],[],[],[]], 
+    players:[]
+});
 /// 8 monstros, 6 potes, 4 armas, 14 moedas
 
 //Moedas
@@ -44,7 +48,7 @@ for(i=0; i<8;i++){
     monster.name = monstros[i].replace(".png","");
     monster.image = monstros[i];
     monster.level = 1;
-    monster.life = 5;
+    monster.life = 6;
     monster.damage = 2;
     monster.bounty = 3;
     lista.push(monster);
@@ -52,14 +56,15 @@ for(i=0; i<8;i++){
 
 const router = express.Router();
 
-
+/*
 router.get('/', async (req,res)=> {
+    console.log("retornando salas...")
     const salas = await Sala.find();
     return res.send(salas);
 });
 
 router.get('/create', async (req,res)=> {
-
+    console.log("criando sala...")
     try {
         const sala = await Sala.create({
             posicoes:[[],[],[],[],[],[]], 
@@ -84,15 +89,15 @@ router.delete('/:id', async (req,res)=> {
     return res.send({status: "deletada", sala: id}) 
 });
 
+*/
 router.post('/join', async (req,res)=> {
     const { nickname, socket, id_sala } = req.body;
 
-    const sala = await Sala.findOne({ _id: id_sala})
-    if(!sala) 
-        return res.status(400).send({ error: "Sala não cadastrada.", id_sala}) 
+    //if(!sala) 
+    //   return res.status(400).send({ error: "Sala não cadastrada.", id_sala}) 
 
     const nplayers = sala.players.length
-    if(nplayers == 4) 
+    if(nplayers == 4)
         return res.status(400).send({ error: "Esta sala está cheia.", id_sala}) 
 
     sala.players.push({nickname, socket})    
@@ -104,10 +109,8 @@ router.post('/join', async (req,res)=> {
 });
 
 //Esse é o metodo q vai iniciar a partida
-router.get('/iniciar/:id_partida', async (req, res) => {
-    const partida =  req.params.id_partida
-    const sala = await Sala.findOne({ _id: partida})
-   
+router.get('/iniciar', async (req, res) => {
+    
     for(i=0; i<6;i++){
         lista.sort(randOrd);
         for(j=0; j<6;j++){
@@ -126,8 +129,8 @@ router.get('/iniciar/:id_partida', async (req, res) => {
     p.type = 0;
     p.nick = sala.players[0].nickname;
     p.level = 1;
-    p.life = 10;
-    p.damage = 3;
+    p.life = 15;
+    p.damage = 2;
     p.bounty = 0;
     p.x = 1;
     p.y = 1;
@@ -148,8 +151,8 @@ router.get('/iniciar/:id_partida', async (req, res) => {
     p.type = 0;
     p.nick = sala.players[1].nickname;
     p.level = 1;
-    p.life = 10;
-    p.damage = 3;
+    p.life = 15;
+    p.damage = 2;
     p.bounty = 0;
     p.x = 1;
     p.y = 4;
@@ -169,8 +172,8 @@ router.get('/iniciar/:id_partida', async (req, res) => {
     p.type = 0;
     p.nick = sala.players[2].nickname;
     p.level = 1;
-    p.life = 10;
-    p.damage = 3;
+    p.life = 15;
+    p.damage = 2;
     p.bounty = 0;
     p.x = 4;
     p.y = 1;
@@ -190,8 +193,8 @@ router.get('/iniciar/:id_partida', async (req, res) => {
     p.type = 0;
     p.nick = sala.players[3].nickname;
     p.level = 1;
-    p.life = 10;
-    p.damage = 3;
+    p.life = 15;
+    p.damage = 2;
     p.bounty = 0;
     p.x = 4;
     p.y = 4;
@@ -207,7 +210,7 @@ router.get('/iniciar/:id_partida', async (req, res) => {
     lista.push(arma);
 
     // ATUALIZA MATRIZ PRO SOCKET
-
+    return res.send({matriz: sala.posicoes}) 
 
 });
 
