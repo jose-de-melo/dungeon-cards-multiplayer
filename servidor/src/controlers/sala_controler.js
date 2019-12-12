@@ -10,11 +10,11 @@ var lista = [];
 //Moedas
 for(i=0; i<14;i++){
     coin = new Card();
-
+    coin.type = 4;
     coin.name = "moeda";
     coin.image = "coin.png";
     coin.level = 0;
-    coin.live = 0;
+    coin.life = 0;
     coin.damage = 0;
     coin.bounty = 1;
     lista.push(coin);
@@ -23,28 +23,26 @@ for(i=0; i<14;i++){
 //Potes
 for(i=0; i<6;i++){
     potion = new Card();
-
+    potion.type = 3;
     potion.name = "potion";
     potion.image = "potion.png";
     potion.level = 0;
-    potion.live = 0;
+    potion.life = 0;
     potion.damage = 0;
-    potion.bounty = 2;
+    potion.bounty = 0;
     lista.push(potion);
 }
-
 //Monstros
 var monstros = ["alien.png","aranha.png","cogumelo.png","esqueleto.png","javali.png","medusa.png","morcego.png","zumbi.png"];
 for(i=0; i<8;i++){
     monster = new Card();
-
+    monster.type = 2;
     monster.name = monstros[i].replace(".png","");
     monster.image = monstros[i];
     monster.level = 1;
-    monster.live = 5;
+    monster.life = 5;
     monster.damage = 2;
     monster.bounty = 3;
-    
     lista.push(monster);
 }
 
@@ -96,7 +94,16 @@ router.post('/join', async (req,res)=> {
     if(nplayers == 4) 
         return res.status(400).send({ error: "Esta sala está cheia.", id_sala}) 
 
-    sala.players.push({nickname, socket, heroi})
+    sala.players.push({nickname, socket, heroi})    
+    arma = new Card();
+    arma.name = heroi;
+    arma.type = 1;
+    arma.image = heroi + ".png";
+    arma.level = 0;
+    arma.life = 0;
+    arma.damage = 0;
+    arma.bounty = 0;
+    lista.push(arma);
 
     const resp = await Sala.update({_id: sala.id }, sala)
     if(!resp.nModified) return res.status(400).send({ error: "Não foi possível entrar na sala.", id_sala})
@@ -109,29 +116,97 @@ router.post('/join', async (req,res)=> {
 router.get('/iniciar/:id_partida', async (req, res) => {
     const partida =  req.params.id_partida
     const sala = await Sala.findOne({ _id: partida})
-    for(p in sala.players){
-        arma = new Card();
-        arma.name = p.heroi;
-        arma.image = p.heroi + ".png";
-        arma.level = 0;
-        arma.live = 0;
-        arma.damage = 0;
-        arma.bounty = 0;
-        lista.push(arma);
+   
+    for(i=0; i<6;i++){
+        lista.sort(randOrd);
+        for(j=0; j<6;j++){
+           posicoes[i][j] = lista[j];
+           posicoes[i][j].x = i;
+           posicoes[i][j].x = j;
+        }
     }
+
+    
     sala.players.sort(randOrd);
-    sala.posicoes[1,1] = sala.players[0];
-    sala.posicoes[1,4] = sala.players[1];
-    sala.posicoes[4,1] = sala.players[2];
-    sala.posicoes[4,4] = sala.players[3];
-    // Aqui ele tem o id da partida, so vai ter um mas ele vai estar fixo como 1.
-    // 1  --  Ele precisa 1, usar um sort colocar os players de fomra aleatoria no vetor de players da sala
-    // 2 -- Ele posiciona os players de acordo com a posição no vetor, [1,1], [1,4], [4,1], [4,4].
-    // Criar um vetor de objetos Card, bolar uma logica pra distribuir armas, itens e monstros. ( pensei no seguinte, criar um vetor com moedas, monstros e pots, e colocar no final, os personagens e as armas)
-    // Sort nesse vetor de item.
-    // Comunica com o socket pela 1 vez aqui, ja com a matriz pronta pra ser exibida.       
+    
+    p = new Card();
+    p.name = sala.players[0].heroi;
+    p.type = 0;
+    p.nick = sala.players[0].nickname;
+    p.level = 1;
+    p.life = 10;
+    p.damage = 3;
+    p.bounty = 0;
+    p.x = 1;
+    p.y = 1;
+    sala.posicoes[1][1] = p;
+
+    p = new Card();
+    p.name = sala.players[1].heroi;
+    p.type = 0;
+    p.nick = sala.players[1].nickname;
+    p.level = 1;
+    p.life = 10;
+    p.damage = 3;
+    p.bounty = 0;
+    p.x = 1;
+    p.y = 4;
+    sala.posicoes[1][4] = p;
+
+    p = new Card();
+    p.name = sala.players[2].heroi;
+    p.type = 0;
+    p.nick = sala.players[2].nickname;
+    p.level = 1;
+    p.life = 10;
+    p.damage = 3;
+    p.bounty = 0;
+    p.x = 4;
+    p.y = 1;
+    sala.posicoes[4][1] = p;
+
+    p = new Card();
+    p.name = sala.players[3].heroi;
+    p.type = 0;
+    p.nick = sala.players[3].nickname;
+    p.level = 1;
+    p.life = 10;
+    p.damage = 3;
+    p.bounty = 0;
+    p.x = 4;
+    p.y = 4;
+    sala.posicoes[4][4] = p;
+
+    // ATUALIZA MATRIZ PRO SOCKET
 
 });
+
+
+
+//Esse é o metodo q vai iniciar a partida
+router.post('/movimenta', async (req, res) => {
+    const { x_atual, y_atual, id_sala, x_mov, y_mov } = req.body;
+    
+    if(x>5)
+        return res.send({ message: 0}) 
+    if(y>5)
+        return res.send({ message: 0}) 
+    if(x<0)
+        return res.send({ message: 0}) 
+    if(y<0)
+        return res.send({ message: 0})
+        
+    sala.posicoes[x_atual][y_atual].x = x_mov;
+    sala.posicoes[x_atual][y_atual].x = y_mov;
+
+    sala.posicoes[x_mov][y_mov] =  sala.posicoes[x_atual][y_atual];
+
+    lista.sort(randOrd);
+    sala.posicoes[x_atual][y_atual] = lista[0];
+});
+
+
+
 
 function randOrd() {
     return (Math.round(Math.random())-0.5);

@@ -41,11 +41,8 @@ router.post('/register', async (req,res)=> {
 });
 
 router.post('/authenticate', async (req,res)=> {
-<<<<<<< HEAD
     console.log("O usuario está logando.")
     
-=======
->>>>>>> 24ad1873d8ba56a0e8a385d335038759ee8eb342
     const { name, password} = req.body;
 
     const user = await User.findOne({ name}).select('+password');
