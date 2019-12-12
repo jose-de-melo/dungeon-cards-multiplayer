@@ -1,6 +1,8 @@
 const express = require('express');
 const Sala = require('../models/sala');
 const Card = require('../models/card');
+const server = require('http').createServer(express);
+const io = require('socket.io')(server);
 
 var lista = [];
 
@@ -214,8 +216,13 @@ router.get('/iniciar', async (req, res) => {
     lista.push(arma);
 
     // ATUALIZA MATRIZ PRO SOCKET
-    return res.send({matriz: sala.posicoes}) 
+   
+    io.on('connection', socket =>{
+        console.log(`Socket conectado: ${socket.id}`)
 
+        socket.emit('attMatriz', sala);
+    });
+    return res.send({matriz: sala.posicoes});
 });
 
 //Esse é o metodo q vai iniciar a partida
