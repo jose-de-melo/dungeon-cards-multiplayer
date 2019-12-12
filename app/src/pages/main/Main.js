@@ -18,6 +18,10 @@ export default function Main(){
 
     function testSocket(){
         const socket = io('http://192.168.1.107:3001');
+
+        console.log(socket.id)
+
+        socket.emit('iniciar', socket.id)
         
         socket.on('attMatriz', function(message){
                 alert(message)
@@ -122,9 +126,10 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFF",
         width: 100,
         height:100,
-        marginLeft: 15,
         justifyContent:"center",
         alignItems:"center",
+        marginRight: 5,
+        marginLeft: 5
     },
 
     values:{

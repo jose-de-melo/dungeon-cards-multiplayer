@@ -1,8 +1,8 @@
 const express = require('express');
 const Sala = require('../models/sala');
 const Card = require('../models/card');
-const server = require('http').createServer(express);
-const io = require('socket.io')(server);
+//const server = require('http').createServer(express);
+//const io = require('socket.io')(server);
 
 var lista = [];
 
@@ -217,11 +217,11 @@ router.get('/iniciar', async (req, res) => {
 
     // ATUALIZA MATRIZ PRO SOCKET
    
-    io.on('connection', socket =>{
-        console.log(`Socket conectado: ${socket.id}`)
-
-        socket.emit('attMatriz', sala);
-    });
+    //io.on('connection', socket =>{
+    //    console.log(`Socket conectado: ${socket.id}`)
+//
+    //    socket.emit('attMatriz', sala);
+    //});
     return res.send({matriz: sala.posicoes});
 });
 
