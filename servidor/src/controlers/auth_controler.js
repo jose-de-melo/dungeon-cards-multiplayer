@@ -39,7 +39,7 @@ router.post('/register', async (req,res)=> {
     }
 });
 
-router.post('/autenticate', async (req,res)=> {
+router.post('/authenticate', async (req,res)=> {
     const { name, password} = req.body;
 
     const user = await User.findOne({ name}).select('+password');

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, AsyncStorage, Image, Keyboard } from 'react-native'
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, Image, Keyboard } from 'react-native'
+import AsyncStorage from '@react-native-community/async-storage'
 
-import axios from 'axios'
 
 import api from '../../services/api'
 
@@ -14,7 +14,7 @@ export default function Login({ navigation }){
         const token = await AsyncStorage.getItem("token")
 
         if(token != null){
-            navigation.navigate("Main")
+            //navigation.navigate("Main")
         }
     }
 
@@ -24,33 +24,15 @@ export default function Login({ navigation }){
     async function handleLogin(){
         Keyboard.dismiss()
 
-        //alert("User: " + user + "\nSenha: " + password)
-
-
-        // const response = await api.get('/products').then(response => {
-        //     console.log(response)
-        //   })
-        //   .catch(error => {
-        //     console.log(error)
-        //   })
-
-        const response = await api.get('')
-        .then(response => {
-                     alert(response)
-                   })
-                   .catch(error => {
-                     alert(error)
-                   })
-
-    //    await api.post('/users/authenticate', body = {
-    //         "name": user,
-    //         "password": password
-    //     }).then(response => {
-    //         console.log(response)
-    //       })
-    //       .catch(error => {
-    //         console.log(error)
-    //       })
+        await api.post('/users/authenticate',{
+             "name": user,
+             "password": password
+         }).then(response => {
+             alert(response)
+           })
+           .catch(error => {
+             alert(error)
+           })
         
         //navigation.navigate('Main')
     }
