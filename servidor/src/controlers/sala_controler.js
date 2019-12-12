@@ -1,6 +1,7 @@
 const express = require('express');
 const Sala = require('../models/sala');
 const Card = require('../models/card');
+const authMiddleware = require('../middlewares/auth')
 
 var lista = [];
 
@@ -49,6 +50,9 @@ for(i=0; i<8;i++){
 
 
 const router = express.Router();
+
+router.use(authMiddleware);
+
 
 router.get('/', async (req,res)=> {
     const salas = await Sala.find();
@@ -133,6 +137,7 @@ function randOrd() {
     return (Math.round(Math.random())-0.5);
 }
 
+//Função desnecessária caso optar por um jogo sem turnos.
 router.get('/rolar_dado', async (req, res) => {
     const dado =  [1, 2, 2, 3, 3, 3, 4, 4, 5, 6]
     dado.sort(randOrd)

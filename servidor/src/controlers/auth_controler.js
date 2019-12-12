@@ -17,6 +17,7 @@ function generateToken(params = {}){
 }
 
 router.post('/register', async (req,res)=> {
+    console.log("O usuario está criando.")
     const { email } = req.body;
     const { name } = req.body;
     try {
@@ -39,7 +40,9 @@ router.post('/register', async (req,res)=> {
     }
 });
 
-router.post('/autenticate', async (req,res)=> {
+router.post('/authenticate', async (req,res)=> {
+    console.log("O usuario está logando.")
+    
     const { name, password} = req.body;
 
     const user = await User.findOne({ name}).select('+password');
