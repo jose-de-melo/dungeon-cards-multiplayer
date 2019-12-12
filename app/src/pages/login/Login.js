@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, AsyncStorage, Image } from 'react-native'
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, AsyncStorage, Image, Keyboard } from 'react-native'
+
+import axios from 'axios'
 
 import api from '../../services/api'
 
 export default function Login({ navigation }){
-    const [user, setUser, password, setPassword] = useState('')
+    const [user, setUser] = useState('')
+    const [password, setPassword] = useState('')
 
     const isLogged = async () => {
         const token = await AsyncStorage.getItem("token")
@@ -19,10 +22,37 @@ export default function Login({ navigation }){
 
 
     async function handleLogin(){
-        //const response = await api.post('/devs')
+        Keyboard.dismiss()
+
+        //alert("User: " + user + "\nSenha: " + password)
+
+
+        // const response = await api.get('/products').then(response => {
+        //     console.log(response)
+        //   })
+        //   .catch(error => {
+        //     console.log(error)
+        //   })
+
+        const response = await api.get('')
+        .then(response => {
+                     alert(response)
+                   })
+                   .catch(error => {
+                     alert(error)
+                   })
+
+    //    await api.post('/users/authenticate', body = {
+    //         "name": user,
+    //         "password": password
+    //     }).then(response => {
+    //         console.log(response)
+    //       })
+    //       .catch(error => {
+    //         console.log(error)
+    //       })
         
-        console.log({user})
-        navigation.navigate('Main')
+        //navigation.navigate('Main')
     }
 
 
@@ -50,6 +80,8 @@ export default function Login({ navigation }){
                 secureTextEntry={true}
                 placeholder="Password"
                 style={styles.input}
+                value={password}
+                onChangeText={setPassword}
             />
 
             <TouchableOpacity onPress={handleLogin} style={styles.button}>
