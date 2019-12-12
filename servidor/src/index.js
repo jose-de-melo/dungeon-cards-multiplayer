@@ -24,3 +24,17 @@ app.listen(options.port, function(){
     console.log(`Servidor rodando na porta ${options.port}`)
 })
 
+const server = require('http').createServer();
+const io = require('socket.io')(server);
+
+io.on('connection', socket => {
+    console.log("CLIENT CONNECT >> " + socket.id)
+    //socket.on('event', data => {  });
+    socket.on('disconnect', () => { console.log("CLIENT DISCONNECTED >> " + socket.id) });
+
+    socket.emit('attMatriz', "TESTANDO SÁ PORRA")
+});
+
+
+server.listen(3001);
+
