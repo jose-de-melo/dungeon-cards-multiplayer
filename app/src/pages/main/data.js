@@ -33,6 +33,168 @@ export default [
         id: 6,
         first_name: "Tracey",
         last_name: "Ramos",
+        avatar: require("./../../images/monstros/aranha.png")
+    },
+    {
+        id: 7,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 8,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 9,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/zumbi.png")
+    },
+    {
+        id: 1,
+        first_name: "George",
+        last_name: "Bluth",
+        avatar: require("./../../images/monstros/medusa.png")
+    },
+    {
+        id: 2,
+        first_name: "Janet",
+        last_name: "Weaver",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 3,
+        first_name: "Emma",
+        last_name: "Wong",
+        avatar: require("./../../images/monstros/medusa.png")
+    },
+    {
+        id: 4,
+        first_name: "Eve",
+        last_name: "Holt",
+        avatar: require("./../../images/monstros/aranha.png")
+    },
+    {
+        id: 5,
+        first_name: "Charles",
+        last_name: "Morris",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 6,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/zumbi.png")
+    },
+    {
+        id: 7,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 8,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/morcego.png")
+    },
+    {
+        id: 9,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/zumbi.png")
+    },
+    {
+        id: 1,
+        first_name: "George",
+        last_name: "Bluth",
+        avatar: require("./../../images/monstros/esqueleto.png")
+    },
+    {
+        id: 2,
+        first_name: "Janet",
+        last_name: "Weaver",
+        avatar: require("./../../images/monstros/cogumelo.png")
+    },
+    {
+        id: 3,
+        first_name: "Emma",
+        last_name: "Wong",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 4,
+        first_name: "Eve",
+        last_name: "Holt",
+        avatar: require("./../../images/monstros/aranha.png")
+    },
+    {
+        id: 5,
+        first_name: "Charles",
+        last_name: "Morris",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 6,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/medusa.png")
+    },
+    {
+        id: 7,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 8,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/cogumelo.png")
+    },
+    {
+        id: 9,
+        first_name: "Tracey",
+        last_name: "Ramos",
+        avatar: require("./../../images/monstros/aranha.png")
+    },
+    {
+        id: 1,
+        first_name: "George",
+        last_name: "Bluth",
+        avatar: require("./../../images/monstros/javali.png")
+    },
+    {
+        id: 2,
+        first_name: "Janet",
+        last_name: "Weaver",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 3,
+        first_name: "Emma",
+        last_name: "Wong",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 4,
+        first_name: "Eve",
+        last_name: "Holt",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 5,
+        first_name: "Charles",
+        last_name: "Morris",
+        avatar: require("./../../images/monstros/alien.png")
+    },
+    {
+        id: 6,
+        first_name: "Tracey",
+        last_name: "Ramos",
         avatar: require("./../../images/monstros/alien.png")
     },
     {
