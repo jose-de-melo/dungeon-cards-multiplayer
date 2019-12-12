@@ -34,6 +34,7 @@ router.get('/infoPlayers/:id', async (req, res) =>{
 })
 
 router.post('/register', async (req,res)=> {
+    console.log("O usuario está criando.")
     const { email } = req.body;
     const { name } = req.body;
     try {
@@ -60,6 +61,7 @@ router.post('/authenticate', async (req,res)=> {
     const { name, password } = req.body;
 
     console.log("Authenticate >> User : " + name + ", Password: " + password)
+
 
     const user = await User.findOne({ name}).select('+password');
     

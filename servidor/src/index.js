@@ -5,6 +5,7 @@ const options = {
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('./config/cors')
 
 const app = express();
 
@@ -15,8 +16,10 @@ require('./controlers/auth_controler')(app);
 require('./controlers/sala_controler')(app);
 require('./controlers/project_controler')(app);
 
+app.use(cors);
 
 app.get('/', (req, res) =>{
+    console.log("Conexão GET encontrada.")
     res.send('Karai Borracha');
 });
 
