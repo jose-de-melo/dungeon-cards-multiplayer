@@ -1,68 +1,56 @@
-import React, {Component} from 'react';
-import { StyleSheet, Text, View, FlatList, Dimensions, Alert, TouchableOpacity } from 'react-native';
+import React, { Component } from 'react';
+import { View, StyleSheet, Dimensions, FlatList, TouchableOpacity, Image } from 'react-native';
+import data from './data'
+import axios from 'axios';
 
-const numColumns = 3;
-var posAtual;
+const api = axios.create({
+  baseURL: 'http://localhost:3000/',
+});
 
-const formatData = (data, numColumns) => {
-    const numberOfFullRows = Math.floor(data.length / numColumns);
-
-    let numberOfElementsLastRow = data.length - (numberOfFullRows * numColumns);
-    while (numberOfElementsLastRow !== numColumns && numberOfElementsLastRow !== 0) {
-        data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
-        numberOfElementsLastRow++;
-    }
-
-    return data;
-};
+let numberGrid = 3
+let numColumns = 3
+let postAtual = 0
 
 export default class App extends Component {
+    state = {
+        data: data
+    }
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            data: [
-                { key: 'A', pos: 0}, { key: 'B' , pos: 1}, { key: '' , pos: 2},
-                { key: '' , pos: 3}, { key: '' , pos: 4}, { key: '' , pos: 5},
-                { key: '' , pos: 6}, { key: '' , pos: 7}, { key: '' , pos: 8},
-            ],
-        };
+    componentDidMount(){
+        this.obterposicoes()
     }
 
     movimentar = (item, index) => {
-        //this.setState({data: []});
-        var data = this.state.data
-        data[2].key = "C";
-        this.setState({ data });
-        //console.log(this.state.data[0])
-        this.forceUpdate();
+        let jogador = this.state.data[postAtual]
+        this.state.data[postAtual] = item
+        this.state.data[index] = jogador
+        postAtual = index
+
+        this.setState(this.state)
+        console.log()
+    };
+
+    obterposicoes = async () => {
+        const response = await api.get('/salas/create')
+        console.log(response)
     }
 
     renderItem = ({ item, index }) => {
-        if (item.empty === true) {
-            return <View style={[styles.item, styles.itemInvisible]} />;
-        }
-
         return (
-            <TouchableOpacity style={styles.item} onPress={() => this.movimentar(item, index)} >
-                <View  >
-                    <Text style={styles.itemText}>{item.key}</Text>
+            <TouchableOpacity style={styles.item} onPress={() => this.movimentar(item, index)}>
+                 <View>
+                    <Image source={item.avatar} style={styles.image}/>
                 </View>
             </TouchableOpacity>
-        );
-    };
+        )
+    }
 
     render() {
-
-        return (
-            <FlatList
-                extraData={this.state}
-                data={this.state.data}
-                style={styles.container}
-                renderItem={this.renderItem}
-                numColumns={numColumns}
-            />
-        );
+        return <FlatList
+            keyExtractor={(_, index) => index}
+            contentContainerStyle={styles.container}
+            numColumns={numberGrid} data={this.state.data}
+            renderItem={this.renderItem} />
     }
 }
 
@@ -85,4 +73,9 @@ const styles = StyleSheet.create({
     itemText: {
         color: '#fff',
     },
+    image: {
+        flex: 1,
+        width: 80,
+        resizeMode: 'contain'
+    }
 });
