@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
 
 require('./controlers/auth_controler')(app);
-//require('./controlers/sala_controler')(app);
+require('./controlers/sala_controler')(app);
 require('./controlers/project_controler')(app);
 
 
@@ -82,111 +82,6 @@ async function iniciar(){
 router.get('/numberOfPlayersOnRoom', async (req, res) => {
     return res.send({code: 200, numberOfPlayers: sala.players.length});
 })
-
-router.get('/iniciar', async (req, res) => {
-    
-    for(i=0; i<6;i++){
-        lista.sort(utils.randOrd);
-        for(j=0; j<6;j++){
-           sala.posicoes[i][j] = lista[j];
-           sala.posicoes[i][j].x = i;
-           sala.posicoes[i][j].x = j;
-        }
-    }
-
-    
-    // sala.players.sort(utils.randOrd);
-    // herois.sort(utils.randOrd);
-    
-    // p = new Card();
-    // p.name = herois[0];
-    // p.type = 0;
-    // p.nick = sala.players[0].nickname;
-    // p.level = 1;
-    // p.life = 15;
-    // p.damage = 2;
-    // p.bounty = 0;
-    // p.x = 1;
-    // p.y = 1;
-    // sala.posicoes[1][1] = p;
-    // arma = new Card();
-    // arma.name = herois[0];
-    // arma.type = 1;
-    // arma.image = herois[0] + ".png";
-    // arma.level = 0;
-    // arma.life = 0;
-    // arma.damage = 0;
-    // arma.bounty = 0;
-    // lista.push(arma);
-
-
-    // p = new Card();
-    // p.name =  herois[1];
-    // p.type = 0;
-    // p.nick = sala.players[1].nickname;
-    // p.level = 1;
-    // p.life = 15;
-    // p.damage = 2;
-    // p.bounty = 0;
-    // p.x = 1;
-    // p.y = 4;
-    // sala.posicoes[1][4] = p;
-    // arma = new Card();
-    // arma.name = herois[1];
-    // arma.type = 1;
-    // arma.image = herois[1] + ".png";
-    // arma.level = 0;
-    // arma.life = 0;
-    // arma.damage = 0;
-    // arma.bounty = 0;
-    // lista.push(arma);
-
-    // p = new Card();
-    // p.name =  herois[2];
-    // p.type = 0;
-    // p.nick = sala.players[2].nickname;
-    // p.level = 1;
-    // p.life = 15;
-    // p.damage = 2;
-    // p.bounty = 0;
-    // p.x = 4;
-    // p.y = 1;
-    // sala.posicoes[4][1] = p;
-    // arma = new Card();
-    // arma.name = herois[2];
-    // arma.type = 1;
-    // arma.image = herois[2] + ".png";
-    // arma.level = 0;
-    // arma.life = 0;
-    // arma.damage = 0;
-    // arma.bounty = 0;
-    // lista.push(arma);
-
-    // p = new Card();
-    // p.name =  herois[3];
-    // p.type = 0;
-    // p.nick = sala.players[3].nickname;
-    // p.level = 1;
-    // p.life = 15;
-    // p.damage = 2;
-    // p.bounty = 0;
-    // p.x = 4;
-    // p.y = 4;
-    // sala.posicoes[4][4] = p;
-    // arma = new Card();
-    // arma.name = herois[3];
-    // arma.type = 1;
-    // arma.image = herois[3] + ".png";
-    // arma.level = 0;
-    // arma.life = 0;
-    // arma.damage = 0;
-    // arma.bounty = 0;
-    // lista.push(arma);
-
-    // ATUALIZA MATRIZ PRO SOCKET
-   
-    return res.send({matriz: sala.posicoes});
-});
 
 router.post('/movimenta', async (req, res) => {
     const { x_atual, y_atual, id_sala, x_mov, y_mov } = req.body;
