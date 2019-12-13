@@ -67,13 +67,13 @@ async function iniciar(){
     utils.generatePlayer(herois[0], sala.players[0], sala, 1, 1);
     utils.generateGun(herois[0], lista);
 
-    utils.generatePlayer(herois1[1], sala.players[1], sala, 1, 4);
+    utils.generatePlayer(herois[1], sala.players[1], sala, 1, 4);
     utils.generateGun(herois[1], lista);
 
-    utils.generatePlayer(herois1[2], sala.players[2], sala, 4, 1);
+    utils.generatePlayer(herois[2], sala.players[2], sala, 4, 1);
     utils.generateGun(herois[2], lista);
 
-    utils.generatePlayer(herois1[3], sala.players[3], sala, 4, 4);
+    utils.generatePlayer(herois[3], sala.players[3], sala, 4, 4);
     utils.generateGun(herois[3], lista);
 
     // ATUALIZA MATRIZ PRO SOCKET
