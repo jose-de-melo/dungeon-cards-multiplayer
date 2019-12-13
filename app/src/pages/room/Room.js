@@ -1,34 +1,52 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet, Image, TouchableOpacity, StatusBar, YellowBox } from 'react-native'
+import { Text, FlatList, View, Dimensions, StyleSheet, Image, TouchableOpacity, StatusBar, YellowBox } from 'react-native'
 
 import AsyncStorage from '@react-native-community/async-storage'
 import io from 'socket.io-client'
 
 const config = require('../../config/config')
 
+let numberGrid = 6
+let numColumns = 6
+let postAtual = 0
+var socket = null
+
+
 
 export default function Room({ navigation }){
-    const [data, setData] = useState([[]])
+    const [data, setData] = useState([])
+    const [user, setUser] = useState('')
+    const [emit, setEmit] = useState(true)
 
-    var socket = io.connect(config.IP_SOCKET_IO)
+    const getUser = async () => {
+        const nick = await AsyncStorage.getItem('nickname')
+        setUser(nick)
+    }
 
-    socket.on('iniciarGame', function(matriz){
-        setData(matriz)
-    })
+    getUser()
 
-    socket.on('attMatriz', function(matriz){
-        setData(matriz)
+    if(socket == null)
+        socket = io.connect(config.IP_SOCKET_IO)
+
+    if(user != '' && emit){    
+        socket.emit('pushPlayer', user)
+        setEmit(false)
+    }
+
+    socket.on('attMatriz', matriz => {
+        setData(JSON.parse(matriz))
     })
 
     function move(item, index){
         socket.emit('move', index)
     }
 
-    renderItem = ({ item, index }) => {
+    const renderItem = ({ item, index }) => {
+        console.log(item[0].name)
         return (
-            <TouchableOpacity style={styles.item} onPress={move(item, index)}>
+            <TouchableOpacity style={styles.item}>
                  <View>
-                    <Image source={item.avatar} style={styles.image}/>
+                    <Image source={require('../../images/hero.png')} style={styles.image}/>
                 </View>
             </TouchableOpacity>
         )
@@ -36,17 +54,12 @@ export default function Room({ navigation }){
 
 
     return (
-        <View>
-            <StatusBar translucent backgroundColor={styles.container.backgroundColor}/>
-
             <FlatList
                 keyExtractor={(_, index) => index}
                 contentContainerStyle={styles.container}
                 numColumns={numberGrid} data={data}
                 renderItem={renderItem}
             />
-        </View>
-        
     )
 }
 
