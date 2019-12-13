@@ -15,8 +15,8 @@ const CardSchema = mongoose.Schema({
         type: String
 
     },
-    type:{
-        type: Number
+    tipo:{
+        type: String
     },
     x:{
         type: Number
