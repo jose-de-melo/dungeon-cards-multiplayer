@@ -2,7 +2,6 @@ const express = require('express');
 const Sala = require('../models/sala');
 const Card = require('../models/card');
 
-var lista = [];
 
 const sala = new Sala({
     posicoes:[[],[],[],[],[],[]], 
@@ -10,21 +9,34 @@ const sala = new Sala({
 });
 /// 8 monstros, 6 potes, 4 armas, 14 moedas
 
-//Moedas
-for(i=0; i<18;i++){
-    coin = new Card();
-    coin.tipo = "item";
-    coin.name = "moeda";
-    coin.image = "moeda";
-    coin.level = 0;
-    coin.life = 0;
-    coin.damage = 0;
-    coin.bounty = 1;
-    lista.push(coin);
+function randOrd() {
+    return (Math.round(Math.random())-0.5);
 }
 
-//Potes
-for(i=0; i<10;i++){
+var monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morcego","zumbi"];
+
+var herois  = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
+
+var heroi_na_sala  = []
+
+
+
+const cria_monstro = (x, y) =>{
+    monster = new Card();
+    monster.tipo = "monstro";
+    monstros.sort(randOrd);
+    monster.name = monstros[0];
+    monster.image = monstros[0];
+    monster.level = 1;
+    monster.life = 6;
+    monster.damage = 2;
+    monster.bounty = 5;
+    monster.x = x;
+    monster.y = y;
+    return monster;
+}
+
+const cria_pot = (x, y) =>{
     potion = new Card();
     potion.tipo = "item";
     potion.name = "poção";
@@ -33,26 +45,61 @@ for(i=0; i<10;i++){
     potion.life = 0;
     potion.damage = 0;
     potion.bounty = 0;
-    lista.push(potion);
+    potion.x = x;
+    potion.y = y;
+    return potion;
 }
 
-//Monstros
-var herois  = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
-
-//Heroi
-var monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morcego","zumbi"];
-
-for(i=0; i<8;i++){
-    monster = new Card();
-    monster.tipo = "monstro";
-    monster.name = monstros[i];
-    monster.image = monstros[i];
-    monster.level = 1;
-    monster.life = 6;
-    monster.damage = 2;
-    monster.bounty = 3;
-    lista.push(monster);
+const cria_moeda = (x, y) =>{
+    coin = new Card();
+    coin.tipo = "item";
+    coin.name = "moeda";
+    coin.image = "moeda";
+    coin.level = 0;
+    coin.life = 0;
+    coin.damage = 0;
+    coin.bounty = 1;
+    coin.x = x;
+    coin.y = y;
+    return coin;
 }
+
+const cria_arma = (x, y) =>{
+
+    arma = new Card();
+    herois.sort(randOrd);
+    arma.name = herois[0];
+    arma.tipo = "arma";
+    arma.image = herois[0];
+    arma.level = 0;
+    arma.life = 0;
+    arma.x = x;
+    arma.y = y;
+    arma.damage = 0;
+    arma.bounty = 0;
+    return arma;
+}
+
+
+const cria_player = (x, y, nick) =>{
+    p = new Card();
+    herois.sort(randOrd);
+    p.name = herois[0];
+    heroi_na_sala.push(herois[0]);
+    p.tipo = "heroi";
+    p.nick = nick;
+    p.image = herois[0];
+    p.level = 0;
+    p.life = 15;
+    p.damage = 2;
+    p.bounty = 0;
+    p.x = x;
+    p.y = y;
+    return p;
+}
+
+
+const vec_func = [cria_moeda, cria_monstro, cria_monstro, cria_pot,cria_pot,cria_pot, cria_arma, cria_monstro, cria_moeda, cria_moeda, cria_moeda]
 
 const router = express.Router();
 
@@ -114,119 +161,25 @@ router.get('/', async (req, res) => {
 
 //Esse é o metodo q vai iniciar a partida
 router.get('/iniciar', async (req, res) => {
-    var cont = 0;
-    lista.sort(randOrd);
     for(i=0; i<6;i++){ 
         for(j=0; j<6;j++){
-            sala.posicoes[i][j] = lista[cont];
-            sala.posicoes[i][j].x = i;
-            sala.posicoes[i][j].y = j;
-            cont++;
+            vec_func.sort(randOrd);
+            sala.posicoes[i][j] = vec_func[0](i, j);
         }
     }
-
-    
     
     sala.players.sort(randOrd);
-    herois.sort(randOrd);
-    
-    p = new Card();
-    p.name = herois[0];
-    p.tipo = "heroi";
-    p.nick = sala.players[0].nickname;
-    p.image = herois[0];
-    p.level = 1;
-    p.life = 15;
-    p.damage = 2;
-    p.bounty = 0;
-    p.x = 1;
-    p.y = 1;
-    sala.posicoes[1][1] = p;
-    arma = new Card();
-    arma.name = herois[0];
-    arma.tipo = "arma";
-    arma.image = herois[0];
-    arma.level = 0;
-    arma.life = 0;
-    arma.damage = 0;
-    arma.bounty = 0;
-    lista.push(arma);
-
-    /*
-
-    p = new Card();
-    p.name =  herois[1];
-    p.tipo = "heroi";
-    p.image = herois[1];
-    p.nick = sala.players[1].nickname;
-    p.level = 1;
-    p.life = 15;
-    p.damage = 2;
-    p.bounty = 0;
-    p.x = 1;
-    p.y = 4;
-    sala.posicoes[1][4] = p;
-    arma = new Card();
-    arma.name = herois[1];
-    arma.tipo = "arma";
-    arma.image = herois[1];
-    arma.level = 0;
-    arma.life = 0;
-    arma.damage = 0;
-    arma.bounty = 0;
-    lista.push(arma);
-
-    p = new Card();
-    p.name =  herois[2];
-    p.tipo = "heroi";
-    p.image = herois[2];
-    p.nick = sala.players[2].nickname;
-    p.level = 1;
-    p.life = 15;
-    p.damage = 2;
-    p.bounty = 0;
-    p.x = 4;
-    p.y = 1;
-    sala.posicoes[4][1] = p;
-    arma = new Card();
-    arma.name = herois[2];
-    arma.tipo = "arma";
-    arma.image = herois[2];
-    arma.level = 0;
-    arma.life = 0;
-    arma.damage = 0;
-    arma.bounty = 0;
-    lista.push(arma);
-
-    p = new Card();
-    p.name =  herois[3];
-    p.tipo = "heroi";
-    p.image = herois[3];
-    p.nick = sala.players[3].nickname;
-    p.level = 1;
-    p.life = 15;
-    p.damage = 2;
-    p.bounty = 0;
-    p.x = 4;
-    p.y = 4;
-    sala.posicoes[4][4] = p;
-    arma = new Card();
-    arma.name = herois[3];
-    arma.tipo = "arma";
-    arma.image = herois[3];
-    arma.level = 0;
-    arma.life = 0;
-    arma.damage = 0;
-    arma.bounty = 0;
-    lista.push(arma);*/
-
+    sala.posicoes[1][1] = cria_player(1,1, sala.players[0].nickname)  
+   
     // ATUALIZA MATRIZ PRO SOCKET
     return res.send({matriz: sala.posicoes}) 
 });
 
 //Esse é o metodo q vai iniciar a partida
-router.post('/movimento', async (req, res) => {
+router.post('/movimento', (req, res) => {
+
     const { x_atual, y_atual, x_mov, y_mov } = req.body;
+    
     if(x_mov>5)
         return res.send({ message: 0}) 
     if(y_mov>5)
@@ -238,17 +191,30 @@ router.post('/movimento', async (req, res) => {
     
     dif_y = Math.abs((y_atual-y_mov))
     dif_x = Math.abs((x_atual-x_mov))
-    if(dif_x+dif_y !='1')
+    if(dif_x+dif_y !=1)
         return res.send({ message: 0})
-
+    
     
     if(sala.posicoes[x_mov][y_mov].name == 'poção'){
-        sala.posicoes[x_atual][y_atual].life += 2;
+        sala.posicoes[x_atual][y_atual].life += 1;
+    }    
+    if(sala.posicoes[x_mov][y_mov].tipo == 'arma'){
+        if(sala.posicoes[x_atual][y_atual].name == sala.posicoes[x_mov][y_mov].name){
+            if( sala.posicoes[x_atual][y_atual].tipo == "heroi_armado"){
+                 console.log("achou a arma mas ja tem");
+                 sala.posicoes[x_atual][y_atual].bounty += 1;
+            }
+            sala.posicoes[x_atual][y_atual].damage = (sala.posicoes[x_atual][y_atual].damage*2)
+            sala.posicoes[x_atual][y_atual].tipo = "heroi_armado";
+        }else{
+            sala.posicoes[x_atual][y_atual].bounty += 1;
+        }
     }    
     if(sala.posicoes[x_mov][y_mov].name == 'moeda'){
         sala.posicoes[x_atual][y_atual].bounty += sala.posicoes[x_mov][y_mov].bounty;
-    }    
-    /*if(sala.posicoes[x_mov][y_mov].tipo == 'monstro'){
+    } 
+    if(sala.posicoes[x_mov][y_mov].tipo == 'monstro'){
+
         //decrementa a vida do monstro, com o seu dano
         sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
 
@@ -261,38 +227,56 @@ router.post('/movimento', async (req, res) => {
             return res.send({ message: sala.posicoes})
         }
 
-        //Player morreu?
-        if(sala.posicoes[x_atual][y_atual].life<=0){//player morreu
-            lista.sort(randOrd);
-            sala.posicoes[x_atual][y_atual] = lista[0];
+        if(sala.posicoes[x_atual][y_atual].life<=0){
+            
+            vec_func.sort(randOrd);
 
+            sala.posicoes[x_atual][y_atual] = vec_func[0](x_atual, y_atual);
+
+            //MORREU TIRA DO SOCKET RPA ELE NAO PODER MAIS MECHER
+            return res.send({ message: 2, data: sala.posicoes})
         }
-    }    */
-   
-    console.log(x_mov, y_mov)
-    //a posição que deseja mover recebe o objeto q esta na posição atual.
-    sala.posicoes[x_mov][y_mov] =  sala.posicoes[x_atual][y_atual];
+    }    
 
-     //atualizou o x e y, do atual pro novo
-     sala.posicoes[x_mov][y_mov].x = x_mov;
-     sala.posicoes[x_mov][y_mov].y = y_mov;
-    //da um sort na lista de itens q podem aparecer
-    lista.sort(randOrd);
-    //coloca um item aleatorio na posição q estava
-    sala.posicoes[x_atual][y_atual] = lista[0];
-    //atualiza o x e y da posicao atual
-    sala.posicoes[x_atual][y_atual].x = x_atual; 
-    sala.posicoes[x_atual][y_atual].y = y_atual; 
+    if(sala.posicoes[x_mov][y_mov].tipo == 'heroi'){
+
+        sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
+
+        if(sala.posicoes[x_mov][y_mov].life>0){
+            //se morreu, retorna a matriz
+            return res.send({ message: sala.posicoes})
+        }
+    }    
+   
+    //a posição que deseja mover recebe o objeto q esta na posição atual.
+    //sala.posicoes[x_mov][y_mov] = 
+    c = new Card();
+    c =  sala.posicoes[x_atual][y_atual];
+    x =  parseInt((c.bounty/10)-(c.level));
+    console.log(c.bounty/10)
+    console.log(c.level)
+    c.damage += x;
+    c.life += (x*2);
+    c.level = parseInt(c.bounty/10);
+
+    //atualizou o x e y, do atual pro novo
+    c.x = x_mov;
+    c.y = y_mov;
+
     
 
-    return res.send({ message: sala.posicoes})
+    vec_func.sort(randOrd);
+
+    n = vec_func[0]( x_atual, y_atual)
+    sala.posicoes[x_mov][y_mov] = c;
+    sala.posicoes[x_atual][y_atual] = n;
+
+    return res.send({message: 1, data: sala.posicoes})
 });
 
 
 
-function randOrd() {
-    return (Math.round(Math.random())-0.5);
-}
+
 
 //Função que pode ser usada caso opte por ter turnos.
 router.get('/rolar_dado', async (req, res) => {
