@@ -120,7 +120,7 @@ router.get('/iniciar', async (req, res) => {
         for(j=0; j<6;j++){
            sala.posicoes[i][j] = lista[j];
            sala.posicoes[i][j].x = i;
-           sala.posicoes[i][j].x = j;
+           sala.posicoes[i][j].y = j;
         }
     }
 
@@ -215,7 +215,7 @@ router.get('/iniciar', async (req, res) => {
 
     // ATUALIZA MATRIZ PRO SOCKET
     return res.send({matriz: sala.posicoes}) 
-
+    
 });
 
 //Esse é o metodo q vai iniciar a partida
