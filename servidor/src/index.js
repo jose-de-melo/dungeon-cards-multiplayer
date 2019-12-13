@@ -77,8 +77,6 @@ async function iniciar(){
     utils.generateGun(herois[3], lista);
 
     // ATUALIZA MATRIZ PRO SOCKET
-   
-    return res.send({matriz: sala.posicoes});
 }
 
 router.get('/iniciar', async (req, res) => {
