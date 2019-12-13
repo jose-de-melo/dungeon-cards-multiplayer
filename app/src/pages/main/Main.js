@@ -9,7 +9,7 @@ YellowBox.ignoreWarnings(['Unrecognized WebSocket']);
 
 import api from '../../services/api'
 
-export default function Main(){
+export default function Main({ navigation }){
 
     const [nickname, setNickname] = useState('')
     const [pdl, setPdl] = useState(0)
