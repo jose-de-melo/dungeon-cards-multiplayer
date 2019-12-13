@@ -67,10 +67,10 @@ const cria_moeda = (x, y) =>{
 const cria_arma = (x, y) =>{
 
     arma = new Card();
-    heroi_na_sala.sort(randOrd);
-    arma.name = heroi_na_sala[0];
+    herois.sort(randOrd);
+    arma.name = herois[0];
     arma.tipo = "arma";
-    arma.image = heroi_na_sala[0];
+    arma.image = herois[0];
     arma.level = 0;
     arma.life = 0;
     arma.x = x;
@@ -85,10 +85,11 @@ const cria_player = (x, y, nick) =>{
     p = new Card();
     herois.sort(randOrd);
     p.name = herois[0];
+    heroi_na_sala.push(herois[0]);
     p.tipo = "heroi";
     p.nick = nick;
     p.image = herois[0];
-    p.level = 1;
+    p.level = 0;
     p.life = 15;
     p.damage = 2;
     p.bounty = 0;
@@ -98,7 +99,7 @@ const cria_player = (x, y, nick) =>{
 }
 
 
-const vec_func = [cria_moeda, cria_monstro, cria_pot, cria_arma, cria_monstro, cria_moeda, cria_moeda, cria_moeda, cria_pot]
+const vec_func = [cria_moeda, cria_monstro, cria_monstro, cria_pot,cria_pot,cria_pot, cria_arma, cria_monstro, cria_moeda, cria_moeda, cria_moeda]
 
 const router = express.Router();
 
@@ -164,7 +165,6 @@ router.get('/iniciar', async (req, res) => {
         for(j=0; j<6;j++){
             vec_func.sort(randOrd);
             sala.posicoes[i][j] = vec_func[0](i, j);
-            console.log(vec_func[0], sala.posicoes[i][j]);
         }
     }
     
@@ -179,9 +179,6 @@ router.get('/iniciar', async (req, res) => {
 router.post('/movimento', (req, res) => {
 
     const { x_atual, y_atual, x_mov, y_mov } = req.body;
-
-    console.log("Estava:", (x_atual), (y_atual))
-    console.log("Estou:", (x_mov), (y_mov))
     
     if(x_mov>5)
         return res.send({ message: 0}) 
@@ -196,15 +193,28 @@ router.post('/movimento', (req, res) => {
     dif_x = Math.abs((x_atual-x_mov))
     if(dif_x+dif_y !=1)
         return res.send({ message: 0})
-    /*
+    
     
     if(sala.posicoes[x_mov][y_mov].name == 'poção'){
-        sala.posicoes[x_atual][y_atual].life += 2;
+        sala.posicoes[x_atual][y_atual].life += 1;
+    }    
+    if(sala.posicoes[x_mov][y_mov].tipo == 'arma'){
+        if(sala.posicoes[x_atual][y_atual].name == sala.posicoes[x_mov][y_mov].name){
+            if( sala.posicoes[x_atual][y_atual].tipo == "heroi_armado"){
+                 console.log("achou a arma mas ja tem");
+                 sala.posicoes[x_atual][y_atual].bounty += 1;
+            }
+            sala.posicoes[x_atual][y_atual].damage = (sala.posicoes[x_atual][y_atual].damage*2)
+            sala.posicoes[x_atual][y_atual].tipo = "heroi_armado";
+        }else{
+            sala.posicoes[x_atual][y_atual].bounty += 1;
+        }
     }    
     if(sala.posicoes[x_mov][y_mov].name == 'moeda'){
         sala.posicoes[x_atual][y_atual].bounty += sala.posicoes[x_mov][y_mov].bounty;
-    }    */
-    /*if(sala.posicoes[x_mov][y_mov].tipo == 'monstro'){
+    } 
+    if(sala.posicoes[x_mov][y_mov].tipo == 'monstro'){
+
         //decrementa a vida do monstro, com o seu dano
         sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
 
@@ -217,33 +227,51 @@ router.post('/movimento', (req, res) => {
             return res.send({ message: sala.posicoes})
         }
 
-        //Player morreu?
-        if(sala.posicoes[x_atual][y_atual].life<=0){//player morreu
-            lista.sort(randOrd);
-            sala.posicoes[x_atual][y_atual] = lista[0];
+        if(sala.posicoes[x_atual][y_atual].life<=0){
+            
+            vec_func.sort(randOrd);
 
+            sala.posicoes[x_atual][y_atual] = vec_func[0](x_atual, y_atual);
+
+            //MORREU TIRA DO SOCKET RPA ELE NAO PODER MAIS MECHER
+            return res.send({ message: 2, data: sala.posicoes})
         }
-    }    */
+    }    
+
+    if(sala.posicoes[x_mov][y_mov].tipo == 'heroi'){
+
+        sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
+
+        if(sala.posicoes[x_mov][y_mov].life>0){
+            //se morreu, retorna a matriz
+            return res.send({ message: sala.posicoes})
+        }
+    }    
    
     //a posição que deseja mover recebe o objeto q esta na posição atual.
     //sala.posicoes[x_mov][y_mov] = 
     c = new Card();
     c =  sala.posicoes[x_atual][y_atual];
+    x =  parseInt((c.bounty/10)-(c.level));
+    console.log(c.bounty/10)
+    console.log(c.level)
+    c.damage += x;
+    c.life += (x*2);
+    c.level = parseInt(c.bounty/10);
+
     //atualizou o x e y, do atual pro novo
     c.x = x_mov;
     c.y = y_mov;
+
+    
 
     vec_func.sort(randOrd);
 
     n = vec_func[0]( x_atual, y_atual)
     sala.posicoes[x_mov][y_mov] = c;
     sala.posicoes[x_atual][y_atual] = n;
-    console.log("Objeto q moveu: "+sala.posicoes[x_mov][y_mov]);
-    console.log("Objeto Criado:" +sala.posicoes[x_atual][y_atual]);
 
-    
-
-    return res.send({ message: sala.posicoes})
+    return res.send({message: 1, data: sala.posicoes})
 });
 
 
