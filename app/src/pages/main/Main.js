@@ -1,26 +1,27 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Dimensions, FlatList, TouchableOpacity, Image } from 'react-native';
-import imagens  from './../../../assets/imagens'
+import { View, StyleSheet, Dimensions, FlatList, TouchableOpacity, Image, Text } from 'react-native';
+import imagens from './../../../assets/imagens'
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://192.168.1.105:3000/',
+    baseURL: 'http://192.168.1.105:3000/',
 });
 
-let numberGrid = 6
-let numColumns = 6
+let numberGrid = 3
+let numColumns = 3
 let nickname = "Outro Ze"
 let player_y = 0;
-let player_X = 0 ;
+let player_x = 0;
 
 export default class App extends Component {
     state = {
-        data: []
+        data: [],
+        playerLive: false
     }
 
-    componentDidMount(){
+    componentDidMount() {
         //this.cadastrar_usuario()
-        this.iniciar()
+        //this.iniciar()
     }
 
     iniciar = async () => {
@@ -29,42 +30,66 @@ export default class App extends Component {
     }
 
     renderizarMatriz = (matriz) => {
-        this.state.data = []
 
-        for(var i=0; i < matriz.length; i++){
-            for(var j=0; j < matriz[i].length; j++){
-                var item = matriz[i][j]
-                this.state.data.push(item)
-
-                if(item.nick == nickname){
-                    player_X = item.x
+        // Encontrar jogador
+        for (var i = 0; i < matriz.length; i++) {
+            for (var j = 0; j < matriz[i].length; j++) {
+                let item = matriz[i][j]
+                if (item.nick == nickname) {
+                    //console.log(item);
+                    player_x = item.x
                     player_y = item.y
-                    console.log( nickname) 
                 }
-
-                console.log(item) 
             }
         }
 
+        // Encontrar x e y a ser exibido no FlatList
+        let x_view = 0 
+        let y_view = 0
+
+        console.log(player_x)
+        console.log(player_y)
+        switch(player_x){
+            case 0: x_view = 0; break;
+            case 5: x_view = player_x - 2; break;
+            default: x_view = player_x - 1
+        }
+
+        switch(player_y){
+            case 0: y_view = 0; break;
+            case 5: y_view = player_y - 2; break;
+            default: y_view = player_y - 1
+        }
+
+        this.state.data = []
+        console.log('inicio', x_view)
+        console.log('inicio', y_view)
+        for(var x=x_view; x < (x_view+3); x++){
+            for(var y=y_view; y < (y_view+3); y++){
+                let item = matriz[x][y]
+                this.state.data.push(item)
+                console.log(x, y)
+            }
+        }
         this.setState(this.state)
     }
 
     movimentar = async (item, index) => {
 
         let y_atual = player_y
-        let x_atual = player_X
+        let x_atual = player_x
         let x_mov = item.x
         let y_mov = item.y
 
         const response = await api.post(
             "/game/movimento",
-            {x_atual, y_atual, x_mov, y_mov}
+            { x_atual, y_atual, x_mov, y_mov }
         )
 
-        if ( response.data.message == 0 ) {
+        if (response.data.message == 0) {
             alert("Movimento Inválido");
         } else {
-            this.renderizarMatriz(response.data.message)
+            this.renderizarMatriz(response.data.matriz)
         }
     };
 
@@ -72,7 +97,7 @@ export default class App extends Component {
         //const response = await api.post('/game/join/', {nickname: "Lucas Heber", socket: 1})
         //const response = await api.post('/game/join/', {nickname: "Domith", socket: 2})
         //const response = await api.post('/game/join/', {nickname: "Ricardo", socket: 3})
-        const response = await api.post('/game/join/', {nickname: nickname, socket: 4})
+        const response = await api.post('/game/join/', { nickname: nickname, socket: 4 })
 
         //console.log(response)
     }
@@ -81,11 +106,13 @@ export default class App extends Component {
         //console.log(item.tipo, item.image)
         return (
             <TouchableOpacity style={styles.item} onPress={() => this.movimentar(item, index)}>
-                 <View>
-                    <Image 
+                <View>
+                    <Text style={styles.life}>{item.name}</Text>
+                    <Image
                         source={imagens[item.tipo][item.image]}
                         style={styles.image}
                     />
+                    <Text style={styles.life}>{item.life == 0 ? '' : item.life}</Text>
                 </View>
             </TouchableOpacity>
         )
@@ -95,7 +122,7 @@ export default class App extends Component {
         return <FlatList
             keyExtractor={(_, index) => index}
             contentContainerStyle={styles.container}
-            numColumns={numberGrid} 
+            numColumns={numberGrid}
             data={this.state.data}
             renderItem={this.renderItem} />
     }
@@ -122,7 +149,13 @@ const styles = StyleSheet.create({
     },
     image: {
         flex: 1,
-        width: 80,
+        width: 100,
         resizeMode: 'contain'
+    },
+    life: {
+        marginLeft: 20,
+        color: '#fff',
+        fontSize: 8,
+        fontFamily: 'PressStart'
     }
 });
