@@ -215,7 +215,6 @@ router.get('/iniciar', async (req, res) => {
 
     // ATUALIZA MATRIZ PRO SOCKET
     return res.send({matriz: sala.posicoes}) 
-    
 });
 
 //Esse é o metodo q vai iniciar a partida
