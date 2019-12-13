@@ -61,23 +61,27 @@ async function iniciar(){
         }
     }
 
-    sala.players.sort(utils.randOrd);
-    herois.sort(utils.randOrd);
+    //sala.players.sort(utils.randOrd);
+    //herois.sort(utils.randOrd);
 
-    utils.generatePlayer(herois[0], sala.players[0], sala, 1, 1);
-    utils.generateGun(herois[0], lista);
+    //utils.generatePlayer(herois[0], sala.players[0], sala, 1, 1);
+    //utils.generateGun(herois[0], lista);
 
-    utils.generatePlayer(herois[1], sala.players[1], sala, 1, 4);
-    utils.generateGun(herois[1], lista);
+    //utils.generatePlayer(herois[1], sala.players[1], sala, 1, 4);
+    //utils.generateGun(herois[1], lista);
 
-    utils.generatePlayer(herois[2], sala.players[2], sala, 4, 1);
-    utils.generateGun(herois[2], lista);
+    //utils.generatePlayer(herois[2], sala.players[2], sala, 4, 1);
+    //utils.generateGun(herois[2], lista);
 
-    utils.generatePlayer(herois[3], sala.players[3], sala, 4, 4);
-    utils.generateGun(herois[3], lista);
+    //utils.generatePlayer(herois[3], sala.players[3], sala, 4, 4);
+    //utils.generateGun(herois[3], lista);
 
     // ATUALIZA MATRIZ PRO SOCKET
 }
+
+router.get('/numberOfPlayersOnRoom', async (req, res) => {
+    return res.send({code: 200, numberOfPlayers: sala.players.length});
+})
 
 router.get('/iniciar', async (req, res) => {
     
@@ -229,16 +233,38 @@ const io = require('socket.io')(server);
 
 io.on('connection', socket => {
     console.log("CLIENT CONNECT >> " + socket.id)
+
     socket.on('disconnect', () => { console.log("CLIENT DISCONNECTED >> " + socket.id) });
 
-     socket.on('iniciar', id => {
+    socket.on('pushPlayer', nickname => {
+        console.log("PUSH PLAYER: " + nickname)
+        iniciar()
+        socket.emit('attMatriz', JSON.stringify(sala.posicoes))
+    })
+
+    socket.on('iniciar', id => {
         console.log("INICIAR > ID: " + socket.id)
         iniciar()
         socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-     })
+    })
+})
 
-    //socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-});
+// io.on('connection', socket => {
+//     console.log("CLIENT CONNECT >> " + socket.id)
+//     socket.on('disconnect', () => { console.log("CLIENT DISCONNECTED >> " + socket.id) });
+
+     //socket.on('iniciar', id => {
+     //    console.log("INICIAR > ID: " + socket.id)
+     //    iniciar()
+     //    socket.emit('attMatriz', JSON.stringify(sala.posicoes))
+     //})
+
+//     socket.on('pushPlayer', nickname => {
+//         console.log("PUSH PLAYER: " + nickname)
+//     })
+
+//     //socket.emit('attMatriz', JSON.stringify(sala.posicoes))
+// });
 
 
 

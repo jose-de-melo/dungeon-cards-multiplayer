@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Text, View, StyleSheet, Image, TouchableOpacity, StatusBar, YellowBox } from 'react-native'
 
+const utils = require('../../utils/utils')
+
 import AsyncStorage from '@react-native-community/async-storage'
 import io from 'socket.io-client'
 
@@ -16,6 +18,10 @@ export default function Main({ navigation }){
     const [wins, setWins] = useState(0)
     const [loses, setLoses] = useState(0)
 
+    const setUser = async (nickname) => {
+        await AsyncStorage.setItem('nickname', nickname)
+    }
+
     function testSocket(){
         const socket = io('http://192.168.1.107:3001');
 
@@ -28,8 +34,23 @@ export default function Main({ navigation }){
         })
     }
 
-    const newGame = () => {
-        alert("Novo jogo...")
+    const newGame = async () => {
+        await api.get('/game/numberOfPlayersOnRoom')
+        .then(response => {
+            if(response.data.code == 200){
+                const { numberOfPlayers } = response.data
+
+                if(numberOfPlayers < 4){
+                    navigation.navigate('Room')
+                }
+                else{
+                    utils.showToastLong('Servidor cheio! Aguarde...')
+                } 
+            }
+          })
+        .catch(error => {
+            alert(error)
+        })
     }
 
     const logout = async () => {
@@ -43,6 +64,7 @@ export default function Main({ navigation }){
         .then(response => {
             if(response.data.code == 200){
                 const { user } = response.data
+                setUser(user.name)
                 setNickname(user.name)
                 setPdl(user.PDL)
                 setWins(user.vitorias)
@@ -94,7 +116,7 @@ export default function Main({ navigation }){
 
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={testSocket}>
+            <TouchableOpacity style={styles.button} onPress={newGame}>
                 <Text style={styles.buttonText}>PLAY</Text>
             </TouchableOpacity>
         </View>
