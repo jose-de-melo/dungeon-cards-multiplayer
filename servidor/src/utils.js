@@ -44,3 +44,30 @@ exports.generateMonsters = (lista, monstros) => {
     }
 }
 
+exports.generatePlayer = (heroi, player, sala, x, y) => {
+    p = new Card();
+    p.name = herois;
+    p.type = 0;
+    p.nick = player.nickname;
+    p.level = 1;
+    p.life = 15;
+    p.damage = 2;
+    p.bounty = 0;
+    p.x = x;
+    p.y = y;
+    sala.posicoes[x][y] = p;
+    
+    
+}
+
+exports.generateGun = (lista, heroi) => {
+    arma = new Card();
+    arma.name = herois;
+    arma.type = 1;
+    arma.image = herois + ".png";
+    arma.level = 0;
+    arma.life = 0;
+    arma.damage = 0;
+    arma.bounty = 0;
+    lista.push(arma);
+}
