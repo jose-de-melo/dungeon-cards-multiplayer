@@ -1,170 +1,128 @@
-import React, { useState } from 'react';
-import { Text, View, StyleSheet, Image, TouchableOpacity, StatusBar, YellowBox } from 'react-native'
+import React, { Component } from 'react';
+import { View, StyleSheet, Dimensions, FlatList, TouchableOpacity, Image } from 'react-native';
+import imagens  from './../../../assets/imagens'
+import axios from 'axios';
 
-import AsyncStorage from '@react-native-community/async-storage'
-import io from 'socket.io-client'
+const api = axios.create({
+  baseURL: 'http://192.168.1.105:3000/',
+});
 
+let numberGrid = 6
+let numColumns = 6
+let nickname = "Outro Ze"
+let player_y = 0;
+let player_X = 0 ;
 
-YellowBox.ignoreWarnings(['Unrecognized WebSocket']);
-
-import api from '../../services/api'
-
-export default function Main({ navigation }){
-
-    const [nickname, setNickname] = useState('')
-    const [pdl, setPdl] = useState(0)
-    const [wins, setWins] = useState(0)
-    const [loses, setLoses] = useState(0)
-
-    function testSocket(){
-        const socket = io('http://192.168.1.107:3001');
-
-        console.log(socket.id)
-
-        socket.emit('iniciar', socket.id)
-        
-        socket.on('attMatriz', function(message){
-                alert(message)
-        })
+export default class App extends Component {
+    state = {
+        data: []
     }
 
-    const newGame = () => {
-        alert("Novo jogo...")
+    componentDidMount(){
+        //this.cadastrar_usuario()
+        this.iniciar()
     }
 
-    const logout = async () => {
-        await AsyncStorage.removeItem("token")
+    iniciar = async () => {
+        const response = await api.get('/game/iniciar')
+        this.renderizarMatriz(response.data.matriz)
     }
 
-    const getInfoPlayer = async () => {
-        const idUser = await AsyncStorage.getItem("id")
+    renderizarMatriz = (matriz) => {
+        this.state.data = []
 
-        await api.get(`/users/infoPlayers/${idUser}`)
-        .then(response => {
-            if(response.data.code == 200){
-                const { user } = response.data
-                setNickname(user.name)
-                setPdl(user.PDL)
-                setWins(user.vitorias)
-                setLoses(user.derrotas)
+        for(var i=0; i < matriz.length; i++){
+            for(var j=0; j < matriz[i].length; j++){
+                var item = matriz[i][j]
+                this.state.data.push(item)
+
+                if(item.nick == nickname){
+                    player_X = item.x
+                    player_y = item.y
+                    console.log( nickname) 
+                }
+
+                console.log(item) 
             }
-          })
-        .catch(error => {
-            alert(error)
-        })
+        }
 
+        this.setState(this.state)
     }
 
-    getInfoPlayer()
+    movimentar = async (item, index) => {
 
-    //logout()
+        let y_atual = player_y
+        let x_atual = player_X
+        let x_mov = item.x
+        let y_mov = item.y
 
-    
+        const response = await api.post(
+            "/game/movimento",
+            {x_atual, y_atual, x_mov, y_mov}
+        )
 
-    return( 
-        <View style={styles.container}>
-            <StatusBar translucent backgroundColor={styles.container.backgroundColor}/>
+        if ( response.data.message == 0 ) {
+            alert("Movimento Inválido");
+        } else {
+            this.renderizarMatriz(response.data.message)
+        }
+    };
 
-            
-            <Image
-                style={styles.img}
-                source={require('../../images/hero.png')}
-            />
+    cadastrar_usuario = async () => {
+        //const response = await api.post('/game/join/', {nickname: "Lucas Heber", socket: 1})
+        //const response = await api.post('/game/join/', {nickname: "Domith", socket: 2})
+        //const response = await api.post('/game/join/', {nickname: "Ricardo", socket: 3})
+        const response = await api.post('/game/join/', {nickname: nickname, socket: 4})
 
+        //console.log(response)
+    }
 
-            <View style={styles.header}>
-                <Text style={styles.headerText}>{nickname}</Text>
-            </View>
-
-            <View style={styles.cardContainer}>
-                <View style={styles.card}>
-                    <Text style={styles.values}>{pdl}</Text>
-                    <Text style={styles.labels}>PDL</Text>
+    renderItem = ({ item, index }) => {
+        //console.log(item.tipo, item.image)
+        return (
+            <TouchableOpacity style={styles.item} onPress={() => this.movimentar(item, index)}>
+                 <View>
+                    <Image 
+                        source={imagens[item.tipo][item.image]}
+                        style={styles.image}
+                    />
                 </View>
-
-                <View style={styles.card}>
-                    <Text style={styles.values}>{wins}</Text>
-                    <Text style={styles.labels}>WINS</Text>
-                </View>
-
-                <View style={styles.card}>
-                    <Text style={styles.values}>{loses}</Text>
-                    <Text style={styles.labels}>LOSES</Text>
-                </View>
-
-            </View>
-
-            <TouchableOpacity style={styles.button} onPress={testSocket}>
-                <Text style={styles.buttonText}>PLAY</Text>
             </TouchableOpacity>
-        </View>
-    )
+        )
+    }
+
+    render() {
+        return <FlatList
+            keyExtractor={(_, index) => index}
+            contentContainerStyle={styles.container}
+            numColumns={numberGrid} 
+            data={this.state.data}
+            renderItem={this.renderItem} />
+    }
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex:1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#6a1b9a'
+        flex: 1,
+        marginVertical: 130,
     },
-
-    header:{
-        width: '100%',
-        height:46,
-        alignItems: "center",
-        justifyContent: "center"
-    },
-
-    headerText: {
-        fontFamily: "PressStart",
-        color: "#FFF",
-        fontSize: 20
-    },
-
-    card: {
-        backgroundColor: "#FFF",
-        width: 100,
-        height:100,
-        justifyContent:"center",
-        alignItems:"center",
-        marginRight: 5,
-        marginLeft: 5
-    },
-
-    values:{
-        fontFamily: "PressStart",
-        fontSize: 35
-    },
-
-    labels:{
-        fontFamily: "PressStart",
-        fontSize: 10
-    },
-
-    cardContainer: {
-        flexDirection: "row"
-    },
-
-    button:{
-        borderWidth:2,
-        borderColor: '#FFF',
-        width: 200,
-        height: 45,
+    item: {
+        backgroundColor: '#4D243D',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 5,
-        marginTop: 40,
+        flex: 1,
+        margin: 1,
+        height: Dimensions.get('window').width / numColumns, // approximate a square
     },
-
-    buttonText:{
-        color: '#FFF',
-        fontWeight: 'bold',
-        fontSize: 17
+    itemInvisible: {
+        backgroundColor: 'transparent',
     },
-
-    img: {
-        marginRight: 30,
-        marginBottom: 30
+    itemText: {
+        color: '#fff',
     },
-})
+    image: {
+        flex: 1,
+        width: 80,
+        resizeMode: 'contain'
+    }
+});
