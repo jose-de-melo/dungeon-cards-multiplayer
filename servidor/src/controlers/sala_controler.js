@@ -71,9 +71,9 @@ const cria_arma = (x, y) =>{
 
     arma = new Card();
     armas.sort(randOrd);
-    arma.name = arma[0];
+    arma.name = armas[0];
     arma.tipo = "arma";
-    arma.image = arma[0];
+    arma.image = armas[0];
     arma.level = 0;
     arma.life = 0;
     arma.x = x;
@@ -102,7 +102,7 @@ const cria_player = (x, y, nick) =>{
 }
 
 
-const vec_func = [cria_moeda, cria_monstro, cria_monstro, cria_pot,cria_pot,cria_pot, cria_arma, cria_monstro, cria_moeda, cria_moeda, cria_moeda]
+const vec_func = [cria_moeda,cria_moeda, cria_moeda, cria_moeda, cria_monstro, cria_monstro, cria_pot,cria_pot,cria_pot, cria_arma, cria_monstro, ]
 
 const router = express.Router();
 
@@ -164,15 +164,22 @@ router.get('/', async (req, res) => {
 
 //Esse é o metodo q vai iniciar a partida
 router.get('/iniciar', async (req, res) => {
+    sala.players.sort(randOrd);
+    sala.posicoes[1][1] = cria_player(1,1, sala.players[0].nickname)  
+
+
     for(i=0; i<6;i++){ 
         for(j=0; j<6;j++){
-            vec_func.sort(randOrd);
-            sala.posicoes[i][j] = vec_func[0](i, j);
+            if((i != 1 || j != 1 )){
+                vec_func.sort(randOrd);
+                sala.posicoes[i][j] = vec_func[0](i, j);
+            }else{
+                console.log(i, j)
+            }
         }
     }
     
-    sala.players.sort(randOrd);
-    sala.posicoes[1][1] = cria_player(1,1, sala.players[0].nickname)  
+   
    
     // ATUALIZA MATRIZ PRO SOCKET
     return res.send({matriz: sala.posicoes}) 
