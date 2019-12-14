@@ -67,7 +67,7 @@ export default function Login({ navigation }){
 
             <Image
                 style={styles.img}
-                source={require('../../images/hero.png')}
+                source={require('./../../../assets/imagens/heroi/templario.png')}
             />
 
             <Text style={styles.text}>Dungeons</Text>
