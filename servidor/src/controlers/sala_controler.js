@@ -20,6 +20,9 @@ var monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morce
 
 var herois  = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
 
+var armas  = []
+
+
 var heroi_na_sala  = []
 
 const cria_monstro = (x, y) =>{
@@ -67,10 +70,10 @@ const cria_moeda = (x, y) =>{
 
 const cria_arma = (x, y) =>{
     arma = new Card();
-    herois.sort(randOrd);
-    arma.name = herois[0];
+    armas.sort(randOrd);
+    arma.name = arma[0];
     arma.tipo = "arma";
-    arma.image = herois[0];
+    arma.image = arma[0];
     arma.level = 0;
     arma.life = 0;
     arma.x = x;
@@ -84,7 +87,7 @@ const cria_player = (x, y, nick) =>{
     p = new Card();
     herois.sort(randOrd);
     p.name = herois[0];
-    heroi_na_sala.push(herois[0]);
+    armas.push(herois[0]);
     p.tipo = "heroi";
     p.nick = nick;
     p.image = herois[0];
@@ -230,7 +233,7 @@ router.post('/movimento', (req, res) => {
         //verifica se o monstro nao morreu
         if(sala.posicoes[x_mov][y_mov].life>0){
             //se morreu, retorna a matriz
-            return res.send({ message: sala.posicoes})
+            return res.send({ matriz: sala.posicoes})
         }
 
         //verifica se o heroi morreu
@@ -239,7 +242,7 @@ router.post('/movimento', (req, res) => {
             sala.posicoes[x_atual][y_atual] = vec_func[0](x_atual, y_atual);
 
             //MORREU TIRA DO SOCKET RPA ELE NAO PODER MAIS MECHER
-            return res.send({ message: 2, data: sala.posicoes})
+            return res.send({ message: 2, matriz: sala.posicoes})
         }
     }    
 
@@ -249,7 +252,7 @@ router.post('/movimento', (req, res) => {
 
         if(sala.posicoes[x_mov][y_mov].life>0){
             //se morreu, retorna a matriz
-            return res.send({ message: sala.posicoes})
+            return res.send({ matriz: sala.posicoes})
         }
     }    
    
@@ -258,8 +261,6 @@ router.post('/movimento', (req, res) => {
     c = new Card();
     c =  sala.posicoes[x_atual][y_atual];
     x =  parseInt((c.bounty/10)-(c.level));
-    console.log(c.bounty/10)
-    console.log(c.level)
     c.damage += x;
     c.life += (x*2);
     c.level = parseInt(c.bounty/10);
@@ -274,7 +275,7 @@ router.post('/movimento', (req, res) => {
     sala.posicoes[x_mov][y_mov] = c;
     sala.posicoes[x_atual][y_atual] = n;
 
-    return res.send({message: 1, data: sala.posicoes})
+    return res.send({message: 1, matriz: sala.posicoes})
 });
 
 
