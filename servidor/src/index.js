@@ -10,12 +10,16 @@ const utils = require('./utils')
 
 var lista = [];
 
-const sala = utils.criarSala()
-utils.generateCoins(lista)
 var herois  = utils.herois
 var monsters = utils.monstros
 
+const sala = utils.criarSala()
+
+utils.generateCoins(lista)
 utils.generateMonsters(lista, monsters)
+utils.generatePotions(lista)
+
+sala.posicoes = lista
 
 const app = express();
 
@@ -23,7 +27,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
 
 require('./controlers/auth_controler')(app);
-require('./controlers/sala_controler')(app);
+//require('./controlers/sala_controler')(app);
 require('./controlers/project_controler')(app);
 
 
@@ -133,14 +137,31 @@ io.on('connection', socket => {
 
     socket.on('pushPlayer', nickname => {
         console.log("PUSH PLAYER: " + nickname)
-        iniciar()
-        socket.emit('attMatriz', JSON.stringify(sala.posicoes))
+        //iniciar()
+        //socket.emit('attMatriz', JSON.stringify(sala.posicoes))
+        sala.players.push(nickname)
+
+        if(sala.players.length == 4){
+            console.log("4 PLAYERS")
+            iniciar()
+            socket.emit('attMatriz', JSON.stringify(sala.posicoes))
+            socket.emit('gameStart', sala.players.length)
+        }
+
+        console.log(sala.players.length)
+        socket.emit('newPlayer', sala.players.length)
+        socket.broadcast.emit('newPlayer', sala.players.length)
     })
 
     socket.on('iniciar', id => {
         console.log("INICIAR > ID: " + socket.id)
-        iniciar()
+
+        if(sala.players.length == 1)
+            iniciar()
+        
         socket.emit('attMatriz', JSON.stringify(sala.posicoes))
+
+        
     })
 })
 

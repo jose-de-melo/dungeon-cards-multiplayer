@@ -3,7 +3,7 @@ const Card = require('./models/card');
 
 
 exports.herois = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
-exports.monstros = ["alien.png","aranha.png","cogumelo.png","esqueleto.png","javali.png","medusa.png","morcego.png","zumbi.png"];
+exports.monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morcego","zumbi"];
 
 exports.randOrd = () => {
     return (Math.round(Math.random())-0.5);
@@ -21,11 +21,12 @@ exports.generateCoins = (lista) => {
         coin = new Card();
         coin.type = 4;
         coin.name = "moeda";
-        coin.image = "coin.png";
+        coin.image = "moeda";
         coin.level = 0;
         coin.life = 0;
         coin.damage = 0;
         coin.bounty = 1;
+        coin.tipo = "item"
         lista.push(coin);
     }
 }
@@ -34,13 +35,29 @@ exports.generateMonsters = (lista, monstros) => {
     for(i=0; i<8;i++){
         monster = new Card();
         monster.type = 2;
-        monster.name = monstros[i].replace(".png","");
+        monster.name = monstros[i];
         monster.image = monstros[i];
+        monster.tipo = "monstro"
         monster.level = 1;
         monster.life = 6;
         monster.damage = 2;
         monster.bounty = 3;
         lista.push(monster);
+    }
+}
+
+exports.generatePotions = (lista) => {
+    // ALTERAR AQUI, VOLTAR PARA i<10
+    for(i=0; i<14;i++){
+        potion = new Card();
+        potion.tipo = "item";
+        potion.name = "poção";
+        potion.image = "potion";
+        potion.level = 0;
+        potion.life = 0;
+        potion.damage = 0;
+        potion.bounty = 0;
+        lista.push(potion);
     }
 }
 
