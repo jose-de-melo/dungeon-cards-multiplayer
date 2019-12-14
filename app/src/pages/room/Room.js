@@ -7,10 +7,12 @@ import imagens  from './../../../assets/imagens'
 
 const config = require('../../config/config')
 
-let numberGrid = 6
-let numColumns = 6
-let postAtual = 0
+let numberGrid = 3
+let numColumns = 3
 var socket = null
+
+var player_x = 0
+var player_y = 0
 
 
 
@@ -28,11 +30,69 @@ export default function Room({ navigation }){
 
     getUser()
 
+    const renderizarMatriz = async (matriz) => {
+        
+        await getUser()
+        //console.log(user)
+        
+        // Encontrar jogador
+        for (var i = 0; i < matriz.length; i++) {
+            for (var j = 0; j < matriz[i].length; j++) {
+                let item = matriz[i][j]
+                console.log(item)
+                if (item.nick == user) {
+                    console.log("ENTROU")
+                    //console.log(item);
+                    player_x = item.x
+                    player_y = item.y
+                }
+            }
+        }
+
+        // Encontrar x e y a ser exibido no FlatList
+        let x_view = 0 
+        let y_view = 0
+
+        //console.log(player_x)
+        //console.log(player_y)
+        switch(player_x){
+            case 0: x_view = 0; break;
+            case 5: x_view = player_x - 2; break;
+            default: x_view = player_x - 1
+        }
+
+        switch(player_y){
+            case 0: y_view = 0; break;
+            case 5: y_view = player_y - 2; break;
+            default: y_view = player_y - 1
+        }
+
+        var list = []
+        //console.log('inicio', x_view)
+        //console.log('inicio', y_view)
+
+        for(var x=x_view; x < (x_view+3); x++){
+            for(var y=y_view; y < (y_view+3); y++){
+                
+                let item = matriz[x][y]
+                console.log(item)
+                list.push(item)
+                //console.log(x, y)
+            }
+        }
+
+        setData(list)
+        //console.log(matriz)
+    }
+
     if(socket == null)
         socket = io.connect(config.IP_SOCKET_IO)
 
     if(user != '' && emit){    
         socket.emit('pushPlayer', user)
+        socket.emit('pushPlayer', 'Ricardo')
+        socket.emit('pushPlayer', 'Domith')
+        socket.emit('pushPlayer', 'Lucas')
         setEmit(false)
     }
 
@@ -41,12 +101,12 @@ export default function Room({ navigation }){
     })
 
     socket.on('newPlayer', numberOfPlayers => {
-        console.log("NEW PLAYER")
+        //console.log("NEW PLAYER")
         setPlayers(numberOfPlayers)
     })
 
-    socket.on('gameStart', numberOfPlayers => {
-        console.log(numberOfPlayers)
+    socket.on('gameStart', matriz => {
+        renderizarMatriz(JSON.parse(matriz))
         setGameOn(true)
     })
 
