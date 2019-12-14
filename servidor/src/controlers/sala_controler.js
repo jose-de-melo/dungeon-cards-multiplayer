@@ -2,7 +2,6 @@ const express = require('express');
 const Sala = require('../models/sala');
 const Card = require('../models/card');
 
-
 const sala = new Sala({
     posicoes:[[],[],[],[],[],[]], 
     players:[]
@@ -13,13 +12,15 @@ function randOrd() {
     return (Math.round(Math.random())-0.5);
 }
 
+const CURA_POTION = 2;
+const RECOMPENSA_COIN = 1;
+const RECOMPENSA_GUN = 1;
+
 var monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morcego","zumbi"];
 
 var herois  = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
 
 var heroi_na_sala  = []
-
-
 
 const cria_monstro = (x, y) =>{
     monster = new Card();
@@ -65,7 +66,6 @@ const cria_moeda = (x, y) =>{
 }
 
 const cria_arma = (x, y) =>{
-
     arma = new Card();
     herois.sort(randOrd);
     arma.name = herois[0];
@@ -79,7 +79,6 @@ const cria_arma = (x, y) =>{
     arma.bounty = 0;
     return arma;
 }
-
 
 const cria_player = (x, y, nick) =>{
     p = new Card();
@@ -175,11 +174,12 @@ router.get('/iniciar', async (req, res) => {
     return res.send({matriz: sala.posicoes}) 
 });
 
-//Esse é o metodo q vai iniciar a partida
+//Esse é o metodo q movimenta o jogador
 router.post('/movimento', (req, res) => {
 
     const { x_atual, y_atual, x_mov, y_mov } = req.body;
     
+    //Verifica as bordas
     if(x_mov>5)
         return res.send({ message: 0}) 
     if(y_mov>5)
@@ -189,30 +189,36 @@ router.post('/movimento', (req, res) => {
     if(y_mov<0)
         return res.send({ message: 0})
     
+    //Verifica se não andou na diagonal ou mais de 1 casa
     dif_y = Math.abs((y_atual-y_mov))
     dif_x = Math.abs((x_atual-x_mov))
     if(dif_x+dif_y !=1)
         return res.send({ message: 0})
     
-    
+    //Se achou cura    
     if(sala.posicoes[x_mov][y_mov].name == 'poção'){
-        sala.posicoes[x_atual][y_atual].life += 1;
+        sala.posicoes[x_atual][y_atual].life += CURA_POTION;
     }    
+    // Se achou arma
     if(sala.posicoes[x_mov][y_mov].tipo == 'arma'){
         if(sala.posicoes[x_atual][y_atual].name == sala.posicoes[x_mov][y_mov].name){
             if( sala.posicoes[x_atual][y_atual].tipo == "heroi_armado"){
                  console.log("achou a arma mas ja tem");
-                 sala.posicoes[x_atual][y_atual].bounty += 1;
+                 sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
             }
             sala.posicoes[x_atual][y_atual].damage = (sala.posicoes[x_atual][y_atual].damage*2)
             sala.posicoes[x_atual][y_atual].tipo = "heroi_armado";
         }else{
-            sala.posicoes[x_atual][y_atual].bounty += 1;
+            sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
         }
-    }    
+    }
+    
+    //Se achou moeda
     if(sala.posicoes[x_mov][y_mov].name == 'moeda'){
-        sala.posicoes[x_atual][y_atual].bounty += sala.posicoes[x_mov][y_mov].bounty;
-    } 
+        sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_COIN;
+    }
+    
+    //Se achou monstro
     if(sala.posicoes[x_mov][y_mov].tipo == 'monstro'){
 
         //decrementa a vida do monstro, com o seu dano
@@ -227,10 +233,9 @@ router.post('/movimento', (req, res) => {
             return res.send({ message: sala.posicoes})
         }
 
+        //verifica se o heroi morreu
         if(sala.posicoes[x_atual][y_atual].life<=0){
-            
             vec_func.sort(randOrd);
-
             sala.posicoes[x_atual][y_atual] = vec_func[0](x_atual, y_atual);
 
             //MORREU TIRA DO SOCKET RPA ELE NAO PODER MAIS MECHER
@@ -238,8 +243,8 @@ router.post('/movimento', (req, res) => {
         }
     }    
 
+    //Verifica se bateu em um heroi
     if(sala.posicoes[x_mov][y_mov].tipo == 'heroi'){
-
         sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
 
         if(sala.posicoes[x_mov][y_mov].life>0){
@@ -262,8 +267,6 @@ router.post('/movimento', (req, res) => {
     //atualizou o x e y, do atual pro novo
     c.x = x_mov;
     c.y = y_mov;
-
-    
 
     vec_func.sort(randOrd);
 
