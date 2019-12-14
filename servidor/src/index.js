@@ -8,18 +8,11 @@ const bodyParser = require('body-parser');
 const cors = require('./config/cors')
 const utils = require('./utils')
 
-var lista = [];
-
 var herois  = utils.herois
 var monsters = utils.monstros
+var armas = []
 
 const sala = utils.criarSala()
-
-utils.generateCoins(lista)
-utils.generateMonsters(lista, monsters)
-utils.generatePotions(lista)
-
-sala.posicoes = lista
 
 const app = express();
 
@@ -56,31 +49,21 @@ router.post('/join', async (req,res)=> {
 });
 
 async function iniciar(){
-    for(i=0; i<6;i++){
-        lista.sort(utils.randOrd);
+    console.log(sala.posicoes.length)
+    console.log(sala.players.length)
+    sala.posicoes[1][1] = utils.generatePlayer(1,1, sala.players[0].nick)
+    sala.posicoes[1][4] = utils.generatePlayer(1,4, sala.players[1].nick)
+    sala.posicoes[4][1] = utils.generatePlayer(4,1, sala.players[2].nick)
+    sala.posicoes[4][4] = utils.generatePlayer(4,4, sala.players[3].nick)
+
+    for(i=0; i<6;i++){ 
         for(j=0; j<6;j++){
-           sala.posicoes[i][j] = lista[j];
-           sala.posicoes[i][j].x = i;
-           sala.posicoes[i][j].x = j;
+            if(!sala.posicoes[i][j]){
+                utils.vec_func.sort(utils.randOrd);
+                sala.posicoes[i][j] = utils.vec_func[0](i, j);
+            }
         }
     }
-
-    //sala.players.sort(utils.randOrd);
-    //herois.sort(utils.randOrd);
-
-    //utils.generatePlayer(herois[0], sala.players[0], sala, 1, 1);
-    //utils.generateGun(herois[0], lista);
-
-    //utils.generatePlayer(herois[1], sala.players[1], sala, 1, 4);
-    //utils.generateGun(herois[1], lista);
-
-    //utils.generatePlayer(herois[2], sala.players[2], sala, 4, 1);
-    //utils.generateGun(herois[2], lista);
-
-    //utils.generatePlayer(herois[3], sala.players[3], sala, 4, 4);
-    //utils.generateGun(herois[3], lista);
-
-    // ATUALIZA MATRIZ PRO SOCKET
 }
 
 router.get('/numberOfPlayersOnRoom', async (req, res) => {
@@ -137,20 +120,17 @@ io.on('connection', socket => {
 
     socket.on('pushPlayer', nickname => {
         console.log("PUSH PLAYER: " + nickname)
-        //iniciar()
-        //socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-        sala.players.push(nickname)
+        sala.players.push({nick: nickname, id_socket: socket.id})
 
         if(sala.players.length == 4){
             console.log("4 PLAYERS")
             iniciar()
-            socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-            socket.emit('gameStart', sala.players.length)
+            socket.emit('gameStart', JSON.stringify(sala.posicoes))
+            socket.broadcast.emit('gameStart', JSON.stringify(sala.posicoes))
+        }else{
+            socket.emit('newPlayer', sala.players.length)
+            socket.broadcast.emit('newPlayer', sala.players.length)
         }
-
-        console.log(sala.players.length)
-        socket.emit('newPlayer', sala.players.length)
-        socket.broadcast.emit('newPlayer', sala.players.length)
     })
 
     socket.on('iniciar', id => {

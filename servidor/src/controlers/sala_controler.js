@@ -163,10 +163,13 @@ router.get('/', async (req, res) => {
 
 //Esse é o metodo q vai iniciar a partida
 router.get('/iniciar', async (req, res) => {
+    sala.posicoes[1][1] = cria_player(1,1, sala.players[0].nickname)
     for(i=0; i<6;i++){ 
         for(j=0; j<6;j++){
-            vec_func.sort(randOrd);
-            sala.posicoes[i][j] = vec_func[0](i, j);
+            if((i != 1 && j != 1 ) && (i != 1 && j != 4 ) && (i != 4 && j != 1 ) && (i != 4 && j != 4 )){
+                vec_func.sort(randOrd);
+                sala.posicoes[i][j] = vec_func[0](i, j);
+            }
         }
     }
     
