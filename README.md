@@ -1,6 +1,6 @@
 # Dungeon Cards MMO
 
-Trabalho realizado pelos alunos [Gabriel Pereira](https://github.com), [Guilherme Domith](https://github.com), [José de Melo](https://github.com), [Lucas Reveli](https://github.com), [Ricardo Costa](https://github.com) e [Tarlles Roman](https://github.com); para a disciplina de Programação para Dispositívos Móveis e Sem Fio lecionada pelo professor [Rafael Alencar](https://github.com) no IF Sudeste MG - Barbacena em 2019.
+Trabalho realizado pelos alunos [Gabriel Pereira](https://github.com/GabrielBPereira), [Guilherme Domith](https://github.com/GuilhermeDomith), [José de Melo](https://github.com/jose-de-melo), [Lucas Heber](https://github.com/lucasheber), [Ricardo Costa](https://github.com/Ricardovcn) e [Tarlles Roman](https://github.com/TarllesRoman); para a disciplina de Programação para Dispositívos Móveis e Sem Fio lecionada pelo professor [Rafael Alencar](https://github.com/rafjaa) no IF Sudeste MG - Barbacena em 2019.
 
 
 #####Imagem da tela de login#####
@@ -34,7 +34,10 @@ Dungeon MMO é um jogo onde quatro jogadores, deverão se enfrentar em 1 dungeon
   - 3º -> recebe 0 pontos de liga (PDL).
   - 4º -> perde 2 pontos de liga (PDL).
   
+  
+ ##### Imagem com a tela que possui o botão play ##### 
+  
  ### Tecnologias utilizadas
  
- Esses jogo foi desenvolvido utilizando as tecnologias [Socket.io]() [React Native]() [Backend eu não sei]()
+ Esses jogo foi desenvolvido utilizando as tecnologias [Socket.io](https://socket.io/), [React Native](https://facebook.github.io/react-native/) e [Node.js](https://nodejs.org/en/)
  
