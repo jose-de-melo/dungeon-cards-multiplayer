@@ -5,7 +5,24 @@ const CardSchema = mongoose.Schema({
     nick: {
         type: String,
         required: true,
-        unique: true,
+        unique: true
+    },
+    level:{
+        type: Number,
+        default: 1
+    },
+    name:{
+        type: String
+
+    },
+    tipo:{
+        type: String
+    },
+    x:{
+        type: Number
+    },
+    y:{
+        type: Number
     },
     image: {
         type: String,
@@ -13,15 +30,15 @@ const CardSchema = mongoose.Schema({
     },
     life : {
         type: Number,
-        default: 0,
+        default: 0
     },
     damage : {
         type: Number,
-        default: 0,
+        default: 0
     },
     bounty : {
         type: Number,
-        default: 0,
+        default: 0
     }
 });
 

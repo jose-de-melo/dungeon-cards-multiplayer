@@ -16,7 +16,25 @@ function generateToken(params = {}){
        })
 }
 
+router.get('/infoPlayers/:id', async (req, res) =>{
+    const id = req.params.id
+
+    //console.log("INFO_PLAYER : " + id)
+
+    const user = await User.findOne({_id : id})
+
+    if (!user)
+        return res.send({ code:45, message: "ID não encontrado"})
+
+    res.send({ 
+        user: user, 
+        token: generateToken({id : user.id}),
+        code: 200
+    });
+})
+
 router.post('/register', async (req,res)=> {
+    console.log("O usuario está criando.")
     const { email } = req.body;
     const { name } = req.body;
     try {
@@ -39,22 +57,27 @@ router.post('/register', async (req,res)=> {
     }
 });
 
-router.post('/autenticate', async (req,res)=> {
-    const { name, password} = req.body;
+router.post('/authenticate', async (req,res)=> {
+    const { name, password } = req.body;
+
+    console.log("Authenticate >> User : " + name + ", Password: " + password)
+
 
     const user = await User.findOne({ name}).select('+password');
+    
 
     if (!user)
-        return res.status(400).send({ error: "Nome de usuário não cadastrado."});
+        return res.send({ message: "Nome de usuário não cadastrado."});
 
     if(!await bcrypt.compare(password, user.password))
-        return res.status(400).send({ error: "Senha inválida."});
+        return res.status(400).send({ message: "Senha inválida."});
     
     user.password = undefined;
 
     res.send({ 
         user, 
-        token: generateToken({id : user.id}) 
+        token: generateToken({id : user.id}),
+        code: 200
     });
 
     //alterar usuario

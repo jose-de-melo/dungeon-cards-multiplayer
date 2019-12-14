@@ -10,14 +10,19 @@
     "lint": "eslint ."
   },
   "dependencies": {
+<<<<<<< HEAD
     "@react-native-community/async-storage": "^1.6.3",
+=======
+    "@react-native-community/async-storage": "^1.7.0",
+>>>>>>> 19d0067939cb2572373b1cf0684ab62dd44b7000
     "axios": "^0.19.0",
     "nes.css": "^2.2.1",
     "react": "16.9.0",
-    "react-native": "0.61.2",
+    "react-native": "^0.61.2",
     "react-native-gesture-handler": "^1.4.1",
     "react-native-reanimated": "^1.3.0",
-    "react-navigation": "^4.0.10"
+    "react-navigation": "^4.0.10",
+    "socket.io-client": "^2.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",

@@ -1,17 +1,63 @@
 import React, { useState } from 'react';
 
+<<<<<<< HEAD
 import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, Image } from 'react-native'
+=======
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar, Image, Keyboard } from 'react-native'
+import AsyncStorage from '@react-native-community/async-storage'
+
+>>>>>>> 19d0067939cb2572373b1cf0684ab62dd44b7000
 
 
+<<<<<<< HEAD
 export default function Login({ navigation }) {
     const [user, setUser,] = useState('')
+=======
+export default function Login({ navigation }){
+    const [user, setUser] = useState('')
+    const [password, setPassword] = useState('')
+>>>>>>> 19d0067939cb2572373b1cf0684ab62dd44b7000
 
 
+<<<<<<< HEAD
     async function handleLogin() {
         //const response = await api.post('/devs')
 
         console.log({ user })
         navigation.navigate('Main')
+=======
+        if(token != null){
+            navigation.navigate("Main")
+        }
+    }
+
+    isLogged()
+
+    async function saveInfo(token, user) {
+        await AsyncStorage.setItem("token", "Bearer " + token)
+        await AsyncStorage.setItem("id", user._id)
+    }
+
+
+    async function handleLogin(){
+        Keyboard.dismiss()
+
+        
+        await api.post('/users/authenticate',{
+             "name": user,
+             "password": password
+        })
+        .then(response => {
+            if(response.data.code == 200){
+                const { token, user } = response.data
+                saveInfo(token, user)
+                navigation.navigate('Main')
+            }
+          })
+        .catch(error => {
+            alert(error)
+        })
+>>>>>>> 19d0067939cb2572373b1cf0684ab62dd44b7000
     }
 
 
@@ -39,6 +85,8 @@ export default function Login({ navigation }) {
                 secureTextEntry={true}
                 placeholder="Password"
                 style={styles.input}
+                value={password}
+                onChangeText={setPassword}
             />
 
             <TouchableOpacity onPress={handleLogin} style={styles.button}>

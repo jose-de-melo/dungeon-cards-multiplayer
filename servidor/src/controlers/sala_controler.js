@@ -2,61 +2,118 @@ const express = require('express');
 const Sala = require('../models/sala');
 const Card = require('../models/card');
 
-var lista = [];
-
+const sala = new Sala({
+    posicoes:[[],[],[],[],[],[]], 
+    players:[]
+});
 /// 8 monstros, 6 potes, 4 armas, 14 moedas
 
-//Moedas
-for(i=0; i<14;i++){
-    coin = new Card();
+function randOrd() {
+    return (Math.round(Math.random())-0.5);
+}
 
+const CURA_POTION = 2;
+const RECOMPENSA_COIN = 1;
+const RECOMPENSA_GUN = 1;
+
+var monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morcego","zumbi"];
+
+var herois  = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
+
+var armas  = []
+
+
+var heroi_na_sala  = []
+
+const cria_monstro = (x, y) =>{
+    monster = new Card();
+    monster.tipo = "monstro";
+    monstros.sort(randOrd);
+    monster.name = monstros[0];
+    monster.image = monstros[0];
+    monster.level = 1;
+    monster.life = 6;
+    monster.damage = 2;
+    monster.bounty = 5;
+    monster.x = x;
+    monster.y = y;
+    return monster;
+}
+
+const cria_pot = (x, y) =>{
+    potion = new Card();
+    potion.tipo = "item";
+    potion.name = "poção";
+    potion.image = "potion";
+    potion.level = 0;
+    potion.life = 0;
+    potion.damage = 0;
+    potion.bounty = 0;
+    potion.x = x;
+    potion.y = y;
+    return potion;
+}
+
+const cria_moeda = (x, y) =>{
+    coin = new Card();
+    coin.tipo = "item";
     coin.name = "moeda";
-    coin.image = "coin.png";
+    coin.image = "moeda";
     coin.level = 0;
-    coin.live = 0;
+    coin.life = 0;
     coin.damage = 0;
     coin.bounty = 1;
-    lista.push(coin);
+    coin.x = x;
+    coin.y = y;
+    return coin;
 }
 
-//Potes
-for(i=0; i<6;i++){
-    potion = new Card();
-
-    potion.name = "potion";
-    potion.image = "potion.png";
-    potion.level = 0;
-    potion.live = 0;
-    potion.damage = 0;
-    potion.bounty = 2;
-    lista.push(potion);
+const cria_arma = (x, y) =>{
+    arma = new Card();
+    armas.sort(randOrd);
+    arma.name = arma[0];
+    arma.tipo = "arma";
+    arma.image = arma[0];
+    arma.level = 0;
+    arma.life = 0;
+    arma.x = x;
+    arma.y = y;
+    arma.damage = 0;
+    arma.bounty = 0;
+    return arma;
 }
 
-//Monstros
-var monstros = ["alien.png","aranha.png","cogumelo.png","esqueleto.png","javali.png","medusa.png","morcego.png","zumbi.png"];
-for(i=0; i<8;i++){
-    monster = new Card();
-
-    monster.name = monstros[i].replace(".png","");
-    monster.image = monstros[i];
-    monster.level = 1;
-    monster.live = 5;
-    monster.damage = 2;
-    monster.bounty = 3;
-    
-    lista.push(monster);
+const cria_player = (x, y, nick) =>{
+    p = new Card();
+    herois.sort(randOrd);
+    p.name = herois[0];
+    armas.push(herois[0]);
+    p.tipo = "heroi";
+    p.nick = nick;
+    p.image = herois[0];
+    p.level = 0;
+    p.life = 15;
+    p.damage = 2;
+    p.bounty = 0;
+    p.x = x;
+    p.y = y;
+    return p;
 }
 
+
+const vec_func = [cria_moeda, cria_monstro, cria_monstro, cria_pot,cria_pot,cria_pot, cria_arma, cria_monstro, cria_moeda, cria_moeda, cria_moeda]
 
 const router = express.Router();
 
+/*
 router.get('/', async (req,res)=> {
+    console.log("retornando salas...")
     const salas = await Sala.find();
     return res.send(salas);
 });
 
 router.get('/create', async (req,res)=> {
-
+    console.log("criando sala...")
     try {
         const sala = await Sala.create({
             posicoes:[[],[],[],[],[],[]], 
@@ -81,81 +138,156 @@ router.delete('/:id', async (req,res)=> {
     return res.send({status: "deletada", sala: id}) 
 });
 
+*/
 router.post('/join', async (req,res)=> {
-    const { nickname, socket, heroi, id_sala } = req.body;
+    const { nickname, socket} = req.body;
 
-    const sala = await Sala.findOne({ _id: id_sala})
-    if(!sala) 
-        return res.status(400).send({ error: "Sala não cadastrada.", id_sala}) 
+    //if(!sala) 
+    //   return res.status(400).send({ error: "Sala não cadastrada.", id_sala}) 
 
     const nplayers = sala.players.length
-    if(nplayers == 4) 
-        return res.status(400).send({ error: "Esta sala está cheia.", id_sala}) 
+    if(nplayers == 4)
+        return res.send({status:400,  error: "Esta sala está cheia."}) 
 
-    sala.players.push({nickname, socket, heroi})
-
-    const resp = await Sala.update({_id: sala.id }, sala)
-    if(!resp.nModified) return res.status(400).send({ error: "Não foi possível entrar na sala.", id_sala})
+    sala.players.push({nickname, socket})   
+    
+    console.log("Cadastrando: "+ nickname+ "   Numero de jogadores:"+sala.players.length)
 
     return res.send({ status: "O player entrou na sala.", num_players: (nplayers+1)})
 });
 
-
-//Esse é o metodo q vai iniciar a partida
-router.get('/iniciar/:id_partida', async (req, res) => {
-    const partida =  req.params.id_partida
-    const sala = await Sala.findOne({ _id: partida})
-    for(p in sala.players){
-        arma = new Card();
-        arma.name = p.heroi;
-        arma.image = p.heroi + ".png";
-        arma.level = 0;
-        arma.live = 0;
-        arma.damage = 0;
-        arma.bounty = 0;
-        lista.push(arma);
-    }
-    sala.players.sort(randOrd);
-    sala.posicoes[1,1] = sala.players[0];
-    sala.posicoes[1,4] = sala.players[1];
-    sala.posicoes[4,1] = sala.players[2];
-    sala.posicoes[4,4] = sala.players[3];
-    // Aqui ele tem o id da partida, so vai ter um mas ele vai estar fixo como 1.
-    // 1  --  Ele precisa 1, usar um sort colocar os players de fomra aleatoria no vetor de players da sala
-    // 2 -- Ele posiciona os players de acordo com a posição no vetor, [1,1], [1,4], [4,1], [4,4].
-    // Criar um vetor de objetos Card, bolar uma logica pra distribuir armas, itens e monstros. ( pensei no seguinte, criar um vetor com moedas, monstros e pots, e colocar no final, os personagens e as armas)
-    // Sort nesse vetor de item.
-    // Comunica com o socket pela 1 vez aqui, ja com a matriz pronta pra ser exibida.   
-    
-
+router.get('/', async (req, res) => {
+    console.log('karai borrachandoasdasdsad');
+    return res.send('Karai borrachaasdasdsadda');
 });
 
-function randOrd() {
-    return (Math.round(Math.random())-0.5);
-}
+//Esse é o metodo q vai iniciar a partida
+router.get('/iniciar', async (req, res) => {
+    for(i=0; i<6;i++){ 
+        for(j=0; j<6;j++){
+            vec_func.sort(randOrd);
+            sala.posicoes[i][j] = vec_func[0](i, j);
+        }
+    }
+    
+    sala.players.sort(randOrd);
+    sala.posicoes[1][1] = cria_player(1,1, sala.players[0].nickname)  
+   
+    // ATUALIZA MATRIZ PRO SOCKET
+    return res.send({matriz: sala.posicoes}) 
+});
 
+//Esse é o metodo q movimenta o jogador
+router.post('/movimento', (req, res) => {
+
+    const { x_atual, y_atual, x_mov, y_mov } = req.body;
+    
+    //Verifica as bordas
+    if(x_mov>5)
+        return res.send({ message: 0}) 
+    if(y_mov>5)
+        return res.send({ message: 0}) 
+    if(x_mov<0)
+        return res.send({ message: 0}) 
+    if(y_mov<0)
+        return res.send({ message: 0})
+    
+    //Verifica se não andou na diagonal ou mais de 1 casa
+    dif_y = Math.abs((y_atual-y_mov))
+    dif_x = Math.abs((x_atual-x_mov))
+    if(dif_x+dif_y !=1)
+        return res.send({ message: 0})
+    
+    //Se achou cura    
+    if(sala.posicoes[x_mov][y_mov].name == 'poção'){
+        sala.posicoes[x_atual][y_atual].life += CURA_POTION;
+    }    
+    // Se achou arma
+    if(sala.posicoes[x_mov][y_mov].tipo == 'arma'){
+        if(sala.posicoes[x_atual][y_atual].name == sala.posicoes[x_mov][y_mov].name){
+            if( sala.posicoes[x_atual][y_atual].tipo == "heroi_armado"){
+                 console.log("achou a arma mas ja tem");
+                 sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
+            }
+            sala.posicoes[x_atual][y_atual].damage = (sala.posicoes[x_atual][y_atual].damage*2)
+            sala.posicoes[x_atual][y_atual].tipo = "heroi_armado";
+        }else{
+            sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
+        }
+    }
+    
+    //Se achou moeda
+    if(sala.posicoes[x_mov][y_mov].name == 'moeda'){
+        sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_COIN;
+    }
+    
+    //Se achou monstro
+    if(sala.posicoes[x_mov][y_mov].tipo == 'monstro'){
+
+        //decrementa a vida do monstro, com o seu dano
+        sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
+
+        //decrementa a sua vida, de acordo com o dano do monstro
+        sala.posicoes[x_atual][y_atual].life -= sala.posicoes[x_mov][y_mov].damage;
+        
+        //verifica se o monstro nao morreu
+        if(sala.posicoes[x_mov][y_mov].life>0){
+            //se morreu, retorna a matriz
+            return res.send({ matriz: sala.posicoes})
+        }
+
+        //verifica se o heroi morreu
+        if(sala.posicoes[x_atual][y_atual].life<=0){
+            vec_func.sort(randOrd);
+            sala.posicoes[x_atual][y_atual] = vec_func[0](x_atual, y_atual);
+
+            //MORREU TIRA DO SOCKET RPA ELE NAO PODER MAIS MECHER
+            return res.send({ message: 2, matriz: sala.posicoes})
+        }
+    }    
+
+    //Verifica se bateu em um heroi
+    if(sala.posicoes[x_mov][y_mov].tipo == 'heroi'){
+        sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
+
+        if(sala.posicoes[x_mov][y_mov].life>0){
+            //se morreu, retorna a matriz
+            return res.send({ matriz: sala.posicoes})
+        }
+    }    
+   
+    //a posição que deseja mover recebe o objeto q esta na posição atual.
+    //sala.posicoes[x_mov][y_mov] = 
+    c = new Card();
+    c =  sala.posicoes[x_atual][y_atual];
+    x =  parseInt((c.bounty/10)-(c.level));
+    c.damage += x;
+    c.life += (x*2);
+    c.level = parseInt(c.bounty/10);
+
+    //atualizou o x e y, do atual pro novo
+    c.x = x_mov;
+    c.y = y_mov;
+
+    vec_func.sort(randOrd);
+
+    n = vec_func[0]( x_atual, y_atual)
+    sala.posicoes[x_mov][y_mov] = c;
+    sala.posicoes[x_atual][y_atual] = n;
+
+    return res.send({message: 1, matriz: sala.posicoes})
+});
+
+
+
+
+
+//Função que pode ser usada caso opte por ter turnos.
 router.get('/rolar_dado', async (req, res) => {
     const dado =  [1, 2, 2, 3, 3, 3, 4, 4, 5, 6]
-    dado.sort.sort(randOrd)
+    dado.sort(randOrd)
     return res.send({ jogadas : dado[0]}) 
 });
 
-router.post('/left', async (req,res)=> {
-    const { nickname, socket, heroi ,id_sala } = req.body;
-
-    const sala = await Sala.findOne({ _id: id_sala})
-    if(!sala) 
-        return res.status(400).send({ error: "Sala não cadastrada.", id_sala}) 
-
-    const i = sala.players.indexOf({nickname, socket, heroi})
-    sala.players.slice(i-1)
-
-    const resp = await Sala.update({_id: sala.id }, sala)
-    if(!resp.nModified) return res.status(400).send({ error: "Não foi possível sair da sala.", id_sala}) 
-
-    return res.send({ status: "O player saiu da sala."}) 
-});
-
-
-module.exports = app => app.use('/salas', router);
+module.exports = app => app.use('/game', router);
     
