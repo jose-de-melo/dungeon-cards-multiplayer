@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
 
 require('./controlers/auth_controler')(app);
-//require('./controlers/sala_controler')(app);
+require('./controlers/sala_controler')(app);
 require('./controlers/project_controler')(app);
 
 
@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
     return res.send('Karai borracha');
 });
 
-router.post('/join', async (req,res)=> {
+/*router.post('/join', async (req,res)=> {
     const { nickname, socket} = req.body;
 
     //if(!sala) 
@@ -46,7 +46,7 @@ router.post('/join', async (req,res)=> {
     console.log("Cadastrando: "+ nickname+ "   Numero de jogadores:"+sala.players.length)
 
     return res.send({ status: "O player entrou na sala.", num_players: (nplayers+1)})
-});
+});*/
 
 async function iniciar(){
     console.log(sala.posicoes.length)

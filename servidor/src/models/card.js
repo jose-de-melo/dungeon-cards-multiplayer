@@ -13,7 +13,6 @@ const CardSchema = mongoose.Schema({
     },
     name:{
         type: String
-
     },
     tipo:{
         type: String
