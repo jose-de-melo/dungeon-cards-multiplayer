@@ -35,7 +35,7 @@ Dungeon MMO é um jogo onde quatro jogadores, deverão se enfrentar em 1 dungeon
   - 4º -> perde 2 pontos de liga (PDL).
   
   
- ##### Imagem com a tela que possui o botão play ##### 
+ #####Imagem com a tela que possui o botão play ##### 
   
  ### Tecnologias utilizadas
  
