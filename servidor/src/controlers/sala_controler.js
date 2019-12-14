@@ -12,9 +12,19 @@ function randOrd() {
     return (Math.round(Math.random())-0.5);
 }
 
+// Valores de recompensa
 const CURA_POTION = 2;
 const RECOMPENSA_COIN = 1;
 const RECOMPENSA_GUN = 1;
+
+// Valores que controlam o nível dos monstros
+var MOEDAS_GERAL = 0;
+var DANO_MONSTRO = 2;
+var VIDA_MONSTRO = 6;
+var RECOMPENSA_MONTRO = 5;
+// Quando as MOEDAS_GERAL atingirem esse valor o DANO_MONSTRO e VIDA_MOSTRO, são multiplicados pelo valor de CONST_UP
+var LIMITE_UPLOAD = 100;
+const CONST_UP = 2; 
 
 var monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morcego","zumbi"];
 
@@ -32,9 +42,9 @@ const cria_monstro = (x, y) =>{
     monster.name = monstros[0];
     monster.image = monstros[0];
     monster.level = 1;
-    monster.life = 6;
-    monster.damage = 2;
-    monster.bounty = 5;
+    monster.life = VIDA_MONSTRO;
+    monster.damage = DANO_MONSTRO;
+    monster.bounty = RECOMPENSA_MONTRO;
     monster.x = x;
     monster.y = y;
     return monster;
@@ -197,6 +207,17 @@ router.post('/movimento', (req, res) => {
     dif_x = Math.abs((x_atual-x_mov))
     if(dif_x+dif_y !=1)
         return res.send({ message: 0})
+
+    //Sempre que a quantidade de moedas coletas atingir 100, o nível dos mosntros recebe 0.
+    if (MOEDAS_GERAL == LIMITE_UPLOAD - 1){
+        DANO_MONSTRO *= CONST_UP;
+        VIDA_MONSTRO *= CONST_UP;
+        RECOMPENSA_MONTRO *= CONST_UP;
+
+        if(CURA_POTION > 1) CURA_POTION = CURA_POTION/2;
+
+        MOEDAS_GERAL = 0;
+    }
     
     //Se achou cura    
     if(sala.posicoes[x_mov][y_mov].name == 'poção'){
@@ -208,17 +229,20 @@ router.post('/movimento', (req, res) => {
             if( sala.posicoes[x_atual][y_atual].tipo == "heroi_armado"){
                  console.log("achou a arma mas ja tem");
                  sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
+                 MOEDAS_GERAL += RECOMPENSA_GUN;
             }
             sala.posicoes[x_atual][y_atual].damage = (sala.posicoes[x_atual][y_atual].damage*2)
             sala.posicoes[x_atual][y_atual].tipo = "heroi_armado";
         }else{
             sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
+            MOEDAS_GERAL += RECOMPENSA_GUN;
         }
     }
     
     //Se achou moeda
     if(sala.posicoes[x_mov][y_mov].name == 'moeda'){
         sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_COIN;
+        MOEDAS_GERAL += RECOMPENSA_COIN;
     }
     
     //Se achou monstro
@@ -277,10 +301,6 @@ router.post('/movimento', (req, res) => {
 
     return res.send({message: 1, matriz: sala.posicoes})
 });
-
-
-
-
 
 //Função que pode ser usada caso opte por ter turnos.
 router.get('/rolar_dado', async (req, res) => {
