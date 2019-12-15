@@ -14,10 +14,8 @@ const api = axios.create({
 
 let numberGrid = 3
 let numColumns = 3
-let nick = "lucas"
 let player_y = 0;
 let player_x = 0;
-let socket;
 
 // a component that calls the imperative ToastAndroid API
 const Toast = (message) => {
@@ -45,7 +43,9 @@ export default class App extends Component {
         pdl: 0,
         wins: 0,
         loses:0,
-        players: 0
+        players: 0,
+        coins: 0,
+        playersLived: 0
     }
 
     componentDidMount() {
@@ -126,6 +126,7 @@ export default class App extends Component {
                 console.log(x, y)
             }
         }
+        this.state.coins = matriz[player_x][player_y].bounty
         this.setState(this.state)
     }
 
@@ -240,7 +241,14 @@ export default class App extends Component {
 
         if(this.state.gameOn){
             return <View style={styles.v_container}>
-                        <Text>{this.state.nickname}</Text>
+                        <StatusBar translucent backgroundColor={styles.v_container.backgroundColor}/>
+                        <View style={styles.viewCoins}>
+                            <Image style={styles.imageGame} source={require('../../../assets/imagens/item/moeda.png')}/>
+                            <Text style={styles.textCoins}>{this.state.coins}</Text>
+
+                            <Text style={styles.textPlayer}>{this.state.nickname}</Text>
+                        </View>
+                        <Text style={styles.textPlayers}>Players: {this.state.playersLived}/4</Text>
                         <FlatList
                             keyExtractor={(_, index) => index}
                             contentContainerStyle={styles.container}
@@ -268,12 +276,11 @@ export default class App extends Component {
 const styles = StyleSheet.create({
     v_container: {
         flex: 1,
-        backgroundColor: '#fff'
-
+        backgroundColor: '#2A2A2A'
     },
     container: {
         flex: 1,
-        marginVertical: 30,
+        marginVertical: 20,
     },
     item: {
         backgroundColor: '#4D243D',
@@ -281,8 +288,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         flex: 1,
         margin: 1,
-        height: 200
-        // height: Dimensions.get('window').width / numColumns, // approximate a square
+        //height: 200
+        height: (Dimensions.get('window').width / numColumns) + 50, // approximate a square
     },
     itemInvisible: {
         backgroundColor: 'transparent',
@@ -309,35 +316,38 @@ const styles = StyleSheet.create({
     },
     life: {
         color: '#fff',
-        marginLeft: 20,
+        marginLeft: 25,
         marginBottom: 5,
         position: "absolute",
         bottom: 0,
     },
     icon_life: {
-        width: '15%',
+        width: '100%',
         // height: 15,
         position: "absolute",
         bottom: 0,
         marginBottom: -50,
-        marginLeft: -10
+        resizeMode: 'contain',
+        left: 0,
+        marginLeft: -50
     },
     damage: {
         color: '#fff',
-        marginLeft: 20,
+        marginLeft: 10,
         marginBottom: 5,
         position: "absolute",
         bottom: 0,
         right: 0,
-        marginRight: 0,
+        marginRight: 5,
     },
     icon_damage: {
-        width: '15%',
+        resizeMode: 'contain',
+        width: '80%',
         // height: 15,
         position: "absolute",
         bottom: 0,
         right: 0,
-        marginRight: 10,
+        marginRight: -13
     },
 
     // Styles MainPage
@@ -397,9 +407,10 @@ const styles = StyleSheet.create({
     },
 
     buttonText:{
+        fontFamily: 'PressStart',
         color: '#FFF',
-        fontWeight: 'bold',
-        fontSize: 17
+        fontSize: 17,
+        top:5
     },
 
     img: {
@@ -421,5 +432,54 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontSize: 25,
         
+    },
+
+    textGame: {
+        textAlign: 'center',
+        fontFamily: 'PressStart',
+        //marginTop: 25
+    },
+
+    textPlayer: {
+        fontSize: 20,
+        fontFamily: 'PressStart',
+        top: 16,
+        right: -100,
+        color: '#FFF'
+    },
+
+    imageGame: {
+        position: 'absolute',
+        left:0,
+        top: -2,
+        width: 50,
+        height: 50,
+        resizeMode: 'contain',
+    },
+
+    viewCoins: {
+        marginTop: 25,
+        alignContent: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#FFF'
+    },
+
+    textCoins: {
+        position: 'absolute',
+        left:45,
+        fontFamily: 'PressStart',
+        top: 16,
+        color: '#FFF'
+    },
+
+    textPlayers: {
+        top: 16,
+        fontFamily: 'PressStart',
+        fontSize: 10,
+        left: 20,
+        marginBottom: 25,
+        color: '#FFF'
     }
+
 });
