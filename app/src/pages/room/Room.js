@@ -41,7 +41,7 @@ export default function Room({ navigation }){
             for (var j = 0; j < matriz[i].length; j++) {
                 let item = matriz[i][j]
                 if (item.nick == user) {
-                    console.log(item)
+                    //console.log(item)
                     player_x = item.x
                     player_y = item.y
                 }
@@ -132,7 +132,7 @@ export default function Room({ navigation }){
     }
 
     const renderItem = ({ item, index }) => {
-        console.log(item.tipo, item.image)
+        //console.log(item.tipo, item.image)
         return (
             <TouchableOpacity style={styles.item} onPress={() => move(item)}>
                  <View>

@@ -37,7 +37,6 @@ app.use(bodyParser.urlencoded({ extended: false}));
 
 require('./controlers/auth_controler')(app);
 //require('./controlers/sala_controler')(app);
-require('./controlers/project_controler')(app);
 
 
 const router = express.Router();
@@ -80,7 +79,7 @@ router.post('/movimentar', (req, res) =>{
     if(y_mov<0)
         return res.send({code: 1, message:"Movimento inválido!"})
 
-    console.log("XATUAL : " + x_atual + " YATUAL: " + y_atual + " XMOV: " + x_mov + " YMOV: " + y_mov)
+    //console.log("XATUAL : " + x_atual + " YATUAL: " + y_atual + " XMOV: " + x_mov + " YMOV: " + y_mov)
     
 
     //Verifica se não andou na diagonal ou mais de 1 casa
@@ -137,9 +136,9 @@ router.post('/movimentar', (req, res) =>{
         //verifica se o monstro nao morreu
         if(sala.posicoes[x_mov][y_mov].life>0){
             //se morreu, retorna a matriz
-            console.log("CAIU NO MONSTRO MORREU")
-            sala.players[0].sock.emit('attMatriz', JSON.stringify(sala.posicoes));
-            sala.players[0].sock.broadcast.emit('attMatriz', JSON.stringify(sala.posicoes));
+            //console.log("CAIU NO MONSTRO MORREU")
+            //io.emit('attMatriz', JSON.stringify(sala.posicoes));
+            io.emit('attMatriz', JSON.stringify(sala.posicoes));
         }
 
         //verifica se o heroi morreu
@@ -155,7 +154,7 @@ router.post('/movimentar', (req, res) =>{
             }
 
             socket.emit('died', 0);
-            socket.broadcast.emit('attMatriz', JSON.stringify(sala.posicoes));
+            io.emit('attMatriz', JSON.stringify(sala.posicoes));
         }
 
         sala.posicoes[x_atual][y_atual].bounty += sala.posicoes[x_mov][y_mov].bounty
@@ -181,7 +180,7 @@ router.post('/movimentar', (req, res) =>{
             }
 
             socket.emit('died', 0);
-            socket.broadcast.emit('attMatriz', JSON.stringify(sala.posicoes));
+            io.emit('attMatriz', JSON.stringify(sala.posicoes));
         }
     }    
    
@@ -200,7 +199,7 @@ router.post('/movimentar', (req, res) =>{
 
     var socket
     for(i=0; i < sala.players.length; i++){
-        console.log(sala.players[i].nick, sala.posicoes[x_atual][y_atual])
+        //console.log(sala.players[i].nick, sala.posicoes[x_atual][y_atual])
         if(sala.players[i].nick == sala.posicoes[x_atual][y_atual].nick){
             socket = sala.players[i].sock
         }
@@ -216,8 +215,8 @@ router.post('/movimentar', (req, res) =>{
 
     //console.log(socket)
 
-    socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-    socket.broadcast.emit('attMatriz', JSON.stringify(sala.posicoes))
+    //socket.emit('attMatriz', JSON.stringify(sala.posicoes))
+    io.emit('attMatriz', JSON.stringify(sala.posicoes))
 
     return res.send({code:0, message: "Movimento válido."})
 })
@@ -234,7 +233,7 @@ function movimentar(x_atual, y_atual, x_mov, y_mov) {
     if(y_mov<0)
         return 1
 
-    console.log("XATUAL : " + x_atual + " YATUAL: " + y_atual + " XMOV: " + x_mov + " YMOV: " + y_mov)
+    //console.log("XATUAL : " + x_atual + " YATUAL: " + y_atual + " XMOV: " + x_mov + " YMOV: " + y_mov)
     
 
     //Verifica se não andou na diagonal ou mais de 1 casa
@@ -262,7 +261,7 @@ function movimentar(x_atual, y_atual, x_mov, y_mov) {
     if(sala.posicoes[x_mov][y_mov].tipo == 'arma'){
         if(sala.posicoes[x_atual][y_atual].name == sala.posicoes[x_mov][y_mov].name){
             if( sala.posicoes[x_atual][y_atual].tipo == "heroi_armado"){
-                 console.log("achou a arma mas ja tem");
+                 //console.log("achou a arma mas ja tem");
                  sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
                  MOEDAS_GERAL += RECOMPENSA_GUN;
             }
@@ -292,7 +291,7 @@ function movimentar(x_atual, y_atual, x_mov, y_mov) {
         //verifica se o monstro nao morreu
         if(sala.posicoes[x_mov][y_mov].life>0){
             //se morreu, retorna a matriz
-            console.log("CAIU NO MONSTRO MORREU")
+            //console.log("CAIU NO MONSTRO MORREU")
             return 0
         }
 
