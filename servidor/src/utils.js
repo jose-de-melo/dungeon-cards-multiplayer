@@ -1,10 +1,37 @@
 const Sala = require('./models/sala');
 const Card = require('./models/card');
+const User = require('./models/user');
 
-
+// Vetores de geração aleatória
 exports.herois = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
 exports.monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morcego","zumbi"];
 exports.armas  = []
+exports.vec_func = [this.generateCoins, this.generateMonsters, this.generateMonsters, 
+    this.generatePotions, this.generatePotions, this.generatePotions, this.generateGun, 
+    this.generateMonsters, this.generateCoins, this.generateCoins, 
+    this.generateCoins
+   ]
+
+// Quantidade de players para o jogo
+exports.QTD_PLAYERS = 4;
+
+// Valores de recompensa
+exports.CURA_POTION = 2;
+exports.RECOMPENSA_COIN = 1;
+exports.RECOMPENSA_GUN = 1;
+
+// Valores que controlam o nível dos monstros
+exports.MOEDAS_GERAL = 0;
+exports.DANO_MONSTRO = 2;
+exports.VIDA_MONSTRO = 6;
+exports.RECOMPENSA_MONSTRO = 5;
+
+// Quando as MOEDAS_GERAL atingirem esse valor o DANO_MONSTRO e VIDA_MOSTRO, são multiplicados pelo valor de CONST_UP
+exports.LIMITE_UPLOAD = 50;
+exports.CONST_UP = 2;
+
+const PDL_WIN = 2;
+const PDL_LOSE = 1;
 
 exports.randOrd = () => {
     return (Math.round(Math.random())-0.5);
@@ -34,15 +61,17 @@ exports.generateCoins = (x, y) => {
 exports.generateMonsters = (x, y) =>{
     monster = new Card();
     monster.tipo = "monstro";
+    monster.level = 1;
+    monster.life = this.VIDA_MONSTRO;
+    monster.damage = this.DANO_MONSTRO;
+    monster.bounty = this.RECOMPENSA_MONSTRO;
+    monster.x = x;
+    monster.y = y;
+
+    // Parte de gerar monstro aleatorio
     this.monstros.sort(this.randOrd);
     monster.name = this.monstros[0];
     monster.image = this.monstros[0];
-    monster.level = 1;
-    monster.life = 6;
-    monster.damage = 2;
-    monster.bounty = 5;
-    monster.x = x;
-    monster.y = y;
     return monster;
 }
 
@@ -91,9 +120,19 @@ exports.generateGun = (x, y) =>{
     return arma;
 }
 
+exports.vitoria = (name) => {
+    const user = await User.findOne({ name });
+    user.PDL += PDL_WIN;
+    user.vitoria += 1;
 
-exports.vec_func = [this.generateCoins, this.generateMonsters, this.generateMonsters, 
-                    this.generatePotions, this.generatePotions, this.generatePotions, this.generateGun, 
-                    this.generateMonsters, this.generateCoins, this.generateCoins, 
-                    this.generateCoins
-                   ]
+    await User.update({_id : user.id}, user);
+}
+
+exports.derrota = (name, posicao) => {
+    const user = await User.findOne({ name });
+
+    user.PDL -= posicao - PDL_LOSE;
+    user.derrota += 1;
+
+    await User.update({_id : user.id}, user);
+}
