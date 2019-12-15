@@ -1,10 +1,33 @@
 const Sala = require('./models/sala');
 const Card = require('./models/card');
 
-
+// Vetores de geração aleatória
 exports.herois = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
 exports.monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morcego","zumbi"];
 exports.armas  = []
+exports.vec_func = [this.generateCoins, this.generateMonsters, this.generateMonsters, 
+    this.generatePotions, this.generatePotions, this.generatePotions, this.generateGun, 
+    this.generateMonsters, this.generateCoins, this.generateCoins, 
+    this.generateCoins
+   ]
+
+// Quantidade de players para o jogo
+exports.QTD_PLAYERS = 4;
+
+// Valores de recompensa
+exports.CURA_POTION = 2;
+exports.RECOMPENSA_COIN = 1;
+exports.RECOMPENSA_GUN = 1;
+
+// Valores que controlam o nível dos monstros
+exports.MOEDAS_GERAL = 0;
+exports.DANO_MONSTRO = 2;
+exports.VIDA_MONSTRO = 6;
+exports.RECOMPENSA_MONTRO = 5;
+
+// Quando as MOEDAS_GERAL atingirem esse valor o DANO_MONSTRO e VIDA_MOSTRO, são multiplicados pelo valor de CONST_UP
+exports.LIMITE_UPLOAD = 50;
+exports.CONST_UP = 2; 
 
 exports.randOrd = () => {
     return (Math.round(Math.random())-0.5);
@@ -90,10 +113,3 @@ exports.generateGun = (x, y) =>{
     arma.bounty = 0;
     return arma;
 }
-
-
-exports.vec_func = [this.generateCoins, this.generateMonsters, this.generateMonsters, 
-                    this.generatePotions, this.generatePotions, this.generatePotions, this.generateGun, 
-                    this.generateMonsters, this.generateCoins, this.generateCoins, 
-                    this.generateCoins
-                   ]
