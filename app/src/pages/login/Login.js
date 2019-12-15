@@ -6,14 +6,14 @@ import AsyncStorage from '@react-native-community/async-storage'
 
 import api from '../../services/api'
 
-export default function Login({ navigation }){
+export default function Login({ navigation }) {
     const [user, setUser] = useState('')
     const [password, setPassword] = useState('')
 
     const isLogged = async () => {
         const token = await AsyncStorage.getItem("token")
 
-        if(token != null){
+        if (token != null) {
             navigation.navigate("Main")
         }
     }
@@ -23,31 +23,31 @@ export default function Login({ navigation }){
     async function saveInfo(token, user) {
         await AsyncStorage.setItem("token", "Bearer " + token)
         await AsyncStorage.setItem("id", user._id)
+        await AsyncStorage.setItem("nickname", user.name)
+
     }
 
 
-    async function handleLogin(){
+    async function handleLogin() {
         Keyboard.dismiss()
-
-        
-        await api.post('/users/authenticate',{
-             "name": user,
-             "password": password
+        await api.post('/users/authenticate', {
+            "name": user,
+            "password": password
         })
-        .then(response => {
-            if(response.data.code == 200){
-                const { token, user } = response.data
-                saveInfo(token, user)
-                navigation.navigate('Main')
-            }
-          })
-        .catch(error => {
-            alert(error)
-        })
+            .then(response => {
+                if (response.data.code == 200) {
+                    const { token, user } = response.data
+                    saveInfo(token, user)
+                    navigation.navigate('Main')
+                }
+            })
+            .catch(error => {
+                alert(error)
+            })
     }
 
 
-    return(
+    return (
         <View style={styles.container}>
             <StatusBar translucent backgroundColor={'#7e57c2'} />
 
@@ -58,7 +58,7 @@ export default function Login({ navigation }){
 
             <Text style={styles.text}>Dungeons</Text>
             <Text style={styles.text}>MMO</Text>
-            <TextInput 
+            <TextInput
                 placeholder="Nickname"
                 style={styles.input}
                 autoCapitalize="none"
@@ -79,15 +79,15 @@ export default function Login({ navigation }){
                 <Text style={styles.buttonText}>Sign In</Text>
             </TouchableOpacity>
 
-            <Text style={styles.createText}>Don't have account ? 
+            <Text style={styles.createText}>Don't have account ?
             </Text>
 
             <TouchableOpacity
-                onPress={() => navigation.navigate('SignUp') }
+                onPress={() => navigation.navigate('SignUp')}
             >
                 <Text style={styles.link}>Create here</Text>
             </TouchableOpacity>
-        </View> 
+        </View>
     );
 }
 
@@ -112,15 +112,15 @@ const styles = StyleSheet.create({
         fontFamily: 'PressStart'
     },
 
-    input:{
+    input: {
         height: 46,
         width: 250,
         backgroundColor: '#fafafa',
         borderColor: '#fafafa',
-        borderWidth:1,
-        borderRadius:4,
+        borderWidth: 1,
+        borderRadius: 4,
         marginTop: 20,
-        paddingHorizontal:15,
+        paddingHorizontal: 15,
     },
 
     button: {
@@ -134,19 +134,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         lineHeight: 12
-        
+
     },
 
     buttonText: {
         color: '#FFF',
         fontSize: 15,
-        
+
     },
 
     createText: {
         color: '#FFF',
-        marginTop:20,
-        fontSize:15,
+        marginTop: 20,
+        fontSize: 15,
 
     },
 

@@ -1,17 +1,23 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Dimensions, FlatList, TouchableOpacity, Image, Text, ToastAndroid, Vibration } from 'react-native';
+import {
+    View, StyleSheet, Dimensions, FlatList,
+    TouchableOpacity, Image, Text, ToastAndroid, Vibration,
+} from 'react-native';
 import imagens from './../../../assets/imagens'
 import axios from 'axios';
+import io from "socket.io-client";
+import AsyncStorage from '@react-native-community/async-storage';
 
 const api = axios.create({
-    baseURL: 'http://192.168.0.3:3000/',
+    baseURL: 'http://192.168.0.3:3000',
 });
 
 let numberGrid = 3
 let numColumns = 3
-let nickname = "Nickname 4"
+let nick = "lucas"
 let player_y = 0;
 let player_x = 0;
+let socket;
 
 // a component that calls the imperative ToastAndroid API
 const Toast = (message) => {
@@ -30,19 +36,43 @@ const Toast = (message) => {
 };
 
 export default class App extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            chatMessage: "",
+            chatMessages: []
+        };
+    }
+
     state = {
         data: [],
         playerLive: false
     }
 
     componentDidMount() {
-        // this.cadastrar_usuario()
+        
         this.iniciar()
+
+        this.socket = io.connect("http://192.168.0.3:3000")
+
+        this.socket.emit('entraSala', nick);
+
+        this.socket.on("renderizaMatriz", matriz => {
+            this.renderizarMatriz(JSON.parse(matriz))
+        });
+
+        this.socket.on("died", matriz => {
+            alert("Você Morreu!")
+            this.renderizarMatriz(JSON.parse(matriz))
+            this.socket.close()
+        });
     }
 
+
     iniciar = async () => {
-        const response = await api.get('/game/iniciar')
-        this.renderizarMatriz(response.data.matriz)
+        nick = await AsyncStorage.getItem("nickname")
+        alert(nick)
     }
 
     renderizarMatriz = (matriz) => {
@@ -51,7 +81,7 @@ export default class App extends Component {
         for (var i = 0; i < matriz.length; i++) {
             for (var j = 0; j < matriz[i].length; j++) {
                 let item = matriz[i][j]
-                if (item.nick == nickname) {
+                if (item.nick == nick) {
                     //console.log(item);
                     player_x = item.x
                     player_y = item.y
@@ -78,8 +108,6 @@ export default class App extends Component {
         }
 
         this.state.data = []
-        console.log('inicio', x_view)
-        console.log('inicio', y_view)
         for (var x = x_view; x < (x_view + 3); x++) {
             for (var y = y_view; y < (y_view + 3); y++) {
                 let item = matriz[x][y]
@@ -96,31 +124,12 @@ export default class App extends Component {
         let x_atual = player_x
         let x_mov = item.x
         let y_mov = item.y
+        let nome_player = nick
 
-        const response = await api.post(
-            "/game/movimento",
-            { x_atual, y_atual, x_mov, y_mov }
+        this.socket.emit('movimentaHeroi',
+            x_atual, y_atual, x_mov, y_mov, nome_player
         )
-
-        if (item.tipo == 'monstro' && response.data.message !== 0) {
-            Vibration.vibrate(100)
-        }
-
-        if (response.data.message == 0) {
-            Toast("Movimento inválido!")
-        } else {
-            this.renderizarMatriz(response.data.matriz)
-        }
     };
-
-    cadastrar_usuario = async () => {
-        //const response = await api.post('/game/join/', {nickname: "Lucas Heber", socket: 1})
-        //const response = await api.post('/game/join/', {nickname: "Domith", socket: 2})
-        //const response = await api.post('/game/join/', {nickname: "Ricardo", socket: 3})
-        const response = await api.post('/game/join/', { nickname: nickname, socket: 4 })
-
-        //console.log(response)
-    }
 
     renderItem = ({ item, index }) => {
         let isHeroi = item.tipo == 'heroi' || item.tipo == 'heroi_armado'
@@ -131,7 +140,7 @@ export default class App extends Component {
             return (
                 <TouchableOpacity style={styles.item} onPress={() => this.movimentar(item, index)}>
                     <View>
-                        <Text style={styles.itemText}>{isHeroi ? nickname : item.name}</Text>
+                        <Text style={styles.itemText}>{isHeroi ? item.nick : item.name}</Text>
 
                         <Image
                             source={imagens[item.tipo][item.image]}
@@ -172,15 +181,14 @@ export default class App extends Component {
     render() {
         return (
             <View style={styles.v_container}>
+                <Text>Lucas Heber</Text>
                 <FlatList
                     keyExtractor={(_, index) => index}
                     contentContainerStyle={styles.container}
                     numColumns={numberGrid}
                     data={this.state.data}
-                    renderItem={this.renderItem } />
-
-                <Text>Lucas Heber</Text>
-        </View>
+                    renderItem={this.renderItem} />
+            </View>
         )
     }
 }
@@ -188,15 +196,12 @@ export default class App extends Component {
 const styles = StyleSheet.create({
     v_container: {
         flex: 1,
-        // flexDirection: 'column',
-        // justifyContent: 'center',
-        // alignItems: "center",
         backgroundColor: '#fff'
 
     },
     container: {
         flex: 1,
-        marginVertical: 8,
+        marginVertical: 30,
     },
     item: {
         backgroundColor: '#4D243D',
