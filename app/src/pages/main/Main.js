@@ -82,7 +82,7 @@ export default function Main({ navigation }){
 
 
             <View style={styles.header}>
-                <Text style={styles.headerText}>{nickname}</Text>
+                <Text style={styles.headerText}>TESTANDO FDP</Text>
             </View>
 
             <View style={styles.cardContainer}>

@@ -15,8 +15,6 @@ const app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
-
-
 require('./controlers/auth_controler')(app);
 
 const sala = new Sala({

@@ -3,9 +3,6 @@ const options = {
     port: process.env.PORT || 3000
 };
 
-const server = require('http').createServer();
-const io = require('socket.io')(server);
-
 const Card = require('./models/card');
 
 const express = require('express');
@@ -31,6 +28,8 @@ const CONST_UP = 2;
 const sala = utils.criarSala()
 
 const app = express();
+const server = require('http').createServer();
+const io = require('socket.io')(server);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
@@ -45,11 +44,153 @@ router.get('/', async (req, res) => {
     return res.send('DungeonsDroid');
 });
 
+const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
+    //Verifica as bordas
+    if(x_mov>5)
+        return 0;
+    if(y_mov>5)
+        return 0;
+    if(x_mov<0)
+        return 0;
+    if(y_mov<0)
+        return 0;
+    
+    //Verifica se não andou na diagonal ou mais de 1 casa
+    dif_y = Math.abs((y_atual-y_mov))
+    dif_x = Math.abs((x_atual-x_mov))
+    if(dif_x+dif_y !=1)
+        return 0;
+
+    //console.log(nome_player)
+
+
+    var achou = 0;
+    for(i in sala.players){
+        if (sala.players[i].nick === nome_player){
+            achou = 1
+            break;
+        }
+    }
+
+    if (achou ==0){
+        return 0;
+    }
+    //Sempre que a quantidade de moedas coletas atingir 100, o nível dos mosntros recebe 0.
+    if (MOEDAS_GERAL == LIMITE_UPLOAD - 1){
+        DANO_MONSTRO *= CONST_UP;
+        VIDA_MONSTRO *= CONST_UP;
+        RECOMPENSA_MONTRO *= CONST_UP;
+
+        if(CURA_POTION > 1) CURA_POTION = CURA_POTION/2;
+
+        MOEDAS_GERAL = 0;
+    }
+    
+    //Se achou cura    
+    if(sala.posicoes[x_mov][y_mov].name == 'poção'){
+        sala.posicoes[x_atual][y_atual].life += CURA_POTION;
+    }    
+    // Se achou arma
+    if(sala.posicoes[x_mov][y_mov].tipo == 'arma'){
+        if(sala.posicoes[x_atual][y_atual].name == sala.posicoes[x_mov][y_mov].name){
+            if( sala.posicoes[x_atual][y_atual].tipo == "heroi_armado"){
+                 sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
+                 MOEDAS_GERAL += RECOMPENSA_GUN;
+            }else{
+                sala.posicoes[x_atual][y_atual].damage = (sala.posicoes[x_atual][y_atual].damage*2)
+                sala.posicoes[x_atual][y_atual].tipo = "heroi_armado";
+            }
+        }else{
+            sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
+            MOEDAS_GERAL += RECOMPENSA_GUN;
+        }
+    }
+    
+    //Se achou moeda
+    if(sala.posicoes[x_mov][y_mov].name == 'moeda'){
+        sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_COIN;
+        MOEDAS_GERAL += RECOMPENSA_COIN;
+    }
+    
+    //Se achou monstro
+    if(sala.posicoes[x_mov][y_mov].tipo == 'monstro'){
+
+        //decrementa a vida do monstro, com o seu dano
+        sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
+
+        //decrementa a sua vida, de acordo com o dano do monstro
+        sala.posicoes[x_atual][y_atual].life -= sala.posicoes[x_mov][y_mov].damage;
+        
+        //verifica se o monstro nao morreu
+        if(sala.posicoes[x_mov][y_mov].life>0){
+            //se nao morreu morreu, retorna a matriz
+            return 1
+        }
+
+        //verifica se o heroi morreu
+        if(sala.posicoes[x_atual][y_atual].life<=0){
+            console.log(sala.posicoes[x_atual][y_atual].nick+"MORREU")
+            for(i in sala.players){
+                if (sala.players[i].nick === sala.posicoes[x_atual][y_atual].nick ){
+                    utils.vec_func.sort(utils.randOrd);
+                    sala.posicoes[x_atual][y_atual] = utils.vec_func[0](x_atual, y_atual);
+                    sala.players[i].socket.emit('died',  JSON.stringify(sala.posicoes));
+                    sala.players.splice(i, 1)
+                    console.log(sala.posicoes[x_atual][y_atual].nick , " MORREU");
+                    break;
+                }
+            }
+            return 2
+        }
+
+        sala.posicoes[x_atual][y_atual].bounty += sala.posicoes[x_mov][y_mov].bounty;
+    }    
+
+    //Verifica se bateu em um heroi
+    if(sala.posicoes[x_mov][y_mov].tipo == 'heroi' || sala.posicoes[x_mov][y_mov].tipo == 'heroi_armado' ){
+        sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
+
+        if(sala.posicoes[x_mov][y_mov].life<=0){
+            console.log(sala.posicoes[x_mov][y_mov].nick+"MORREU")
+            for(i in sala.players){
+                if (sala.players[i].nick === sala.posicoes[x_mov][y_mov].nick ){
+                    utils.vec_func.sort(utils.randOrd);
+                    sala.posicoes[x_mov][y_mov] = utils.vec_func[0](x_mov, y_mov);
+                    sala.players[i].socket.emit('died', JSON.stringify(sala.posicoes));
+                    sala.players.splice(i, 1)
+                    break;
+                }
+            }
+            return 2
+        }
+        return 1
+    }    
+   
+    //a posição que deseja mover recebe o objeto q esta na posição atual.
+    //sala.posicoes[x_mov][y_mov] =  
+    x =  parseInt((sala.posicoes[x_atual][y_atual].bounty/10)-(sala.posicoes[x_atual][y_atual].level));
+    sala.posicoes[x_atual][y_atual].damage += x;
+    sala.posicoes[x_atual][y_atual].life += (x*2);
+    sala.posicoes[x_atual][y_atual].level = parseInt(sala.posicoes[x_atual][y_atual].bounty/10);
+
+    //atualizou o x e y, do atual pro novo
+    sala.posicoes[x_atual][y_atual].x = x_mov;
+    sala.posicoes[x_atual][y_atual].y = y_mov;
+
+    sala.posicoes[x_mov][y_mov] = sala.posicoes[x_atual][y_atual];
+    utils.vec_func.sort(utils.randOrd);
+    sala.posicoes[x_atual][y_atual] = utils.vec_func[0]( x_atual, y_atual);
+
+    return 1
+}
+
 async function iniciar(){
-    sala.posicoes[1][1] = utils.generatePlayer(1,1, sala.players[0].nick)
-    sala.posicoes[1][4] = utils.generatePlayer(1,4, sala.players[1].nick)
-    sala.posicoes[4][1] = utils.generatePlayer(4,1, sala.players[2].nick)
-    sala.posicoes[4][4] = utils.generatePlayer(4,4, sala.players[3].nick)
+    sala.players.sort(utils.randOrd)
+    utils.herois.sort(utils.randOrd);
+    sala.posicoes[1][1] = utils.generatePlayer(1,1, sala.players[0].nick, 0)
+    sala.posicoes[1][4] = utils.generatePlayer(1,4, sala.players[1].nick, 1)
+    sala.posicoes[4][1] = utils.generatePlayer(4,1, sala.players[2].nick, 2)
+    sala.posicoes[4][4] = utils.generatePlayer(4,4, sala.players[3].nick, 3)
 
     for(i=0; i<6;i++){ 
         for(j=0; j<6;j++){
@@ -57,12 +198,8 @@ async function iniciar(){
                 utils.vec_func.sort(utils.randOrd);
                 sala.posicoes[i][j] = utils.vec_func[0](i, j);
             }
-            else{
-                console.log(sala.posicoes[i][j])
-            }
         }
     }
-
 }
 
 router.post('/movimentar', (req, res) =>{
@@ -221,127 +358,6 @@ router.post('/movimentar', (req, res) =>{
     return res.send({code:0, message: "Movimento válido."})
 })
 
-
-function movimentar(x_atual, y_atual, x_mov, y_mov) {
-    //Verifica as bordas
-    if(x_mov>5)
-        return 1
-    if(y_mov>5)
-        return 1
-    if(x_mov<0)
-        return 1
-    if(y_mov<0)
-        return 1
-
-    //console.log("XATUAL : " + x_atual + " YATUAL: " + y_atual + " XMOV: " + x_mov + " YMOV: " + y_mov)
-    
-
-    //Verifica se não andou na diagonal ou mais de 1 casa
-    dif_y = Math.abs(y_atual - y_mov)
-    dif_x = Math.abs(( x_atual - x_mov))
-    if(dif_x+dif_y !=1)
-        return 1
-
-    //Sempre que a quantidade de moedas coletas atingir 100, o nível dos monstros recebe 0.
-    if (MOEDAS_GERAL == LIMITE_UPLOAD - 1){
-        DANO_MONSTRO *= CONST_UP;
-        VIDA_MONSTRO *= CONST_UP;
-        RECOMPENSA_MONTRO *= CONST_UP;
-
-        if(CURA_POTION > 1) CURA_POTION = CURA_POTION/2;
-
-        MOEDAS_GERAL = 0;
-    }
-
-    //Se achou cura    
-    if(sala.posicoes[x_mov][y_mov].name == 'poção'){
-        sala.posicoes[x_atual][y_atual].life += CURA_POTION;
-    }    
-    // Se achou arma
-    if(sala.posicoes[x_mov][y_mov].tipo == 'arma'){
-        if(sala.posicoes[x_atual][y_atual].name == sala.posicoes[x_mov][y_mov].name){
-            if( sala.posicoes[x_atual][y_atual].tipo == "heroi_armado"){
-                 //console.log("achou a arma mas ja tem");
-                 sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
-                 MOEDAS_GERAL += RECOMPENSA_GUN;
-            }
-            sala.posicoes[x_atual][y_atual].damage = (sala.posicoes[x_atual][y_atual].damage*2)
-            sala.posicoes[x_atual][y_atual].tipo = "heroi_armado";
-        }else{
-            sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
-            MOEDAS_GERAL += RECOMPENSA_GUN;
-        }
-    }
-    
-    //Se achou moeda
-    if(sala.posicoes[x_mov][y_mov].name == 'moeda'){
-        sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_COIN;
-        MOEDAS_GERAL += RECOMPENSA_COIN;
-    }
-    
-    //Se achou monstro
-    if(sala.posicoes[x_mov][y_mov].tipo == 'monstro'){
-
-        //decrementa a vida do monstro, com o seu dano
-        sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
-
-        //decrementa a sua vida, de acordo com o dano do monstro
-        sala.posicoes[x_atual][y_atual].life -= sala.posicoes[x_mov][y_mov].damage;
-        
-        //verifica se o monstro nao morreu
-        if(sala.posicoes[x_mov][y_mov].life>0){
-            //se morreu, retorna a matriz
-            //console.log("CAIU NO MONSTRO MORREU")
-            return 0
-        }
-
-        //verifica se o heroi morreu
-        if(sala.posicoes[x_atual][y_atual].life<=0){
-            utils.vec_func.sort(randOrd);
-            sala.posicoes[x_atual][y_atual] = vec_func[0](x_atual, y_atual);
-
-            return 2
-        }
-
-        sala.posicoes[x_atual][y_atual].bounty += sala.posicoes[x_mov][y_mov].bounty
-    }    
-
-    //Verifica se bateu em um heroi
-    if(sala.posicoes[x_mov][y_mov].tipo == 'heroi'){
-        sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
-
-        if(sala.posicoes[x_mov][y_mov].life <= 0){
-            vec_func.sort(randOrd);
-            sala.posicoes[x_mov][y_mov] = sala.posicoes[x_atual][y_atual]
-            sala.posicoes[x_mov][y_mov].x = x_mov
-            sala.posicoes[x_mov][y_mov].y = y_mov
-            sala.posicoes[x_atual][y_atual] = utils.vec_func[0](x_atual, y_atual);
-            return 3
-        }
-    }    
-   
-    //a posição que deseja mover recebe o objeto q esta na posição atual.
-    //sala.posicoes[x_mov][y_mov] = 
-    c = new Card();
-    c =  sala.posicoes[x_atual][y_atual];
-    x =  parseInt((c.bounty/10)-(c.level));
-    c.damage += x;
-    c.life += (x*2);
-    c.level = parseInt(c.bounty/10);
-
-    //atualizou o x e y, do atual pro novo
-    c.x = x_mov;
-    c.y = y_mov;
-
-    utils.vec_func.sort(utils.randOrd);
-
-    n = utils.vec_func[0]( x_atual, y_atual)
-    sala.posicoes[x_mov][y_mov] = c;
-    sala.posicoes[x_atual][y_atual] = n
-
-    return 0
-}
-
 router.get('/numberOfPlayersOnRoom', async (req, res) => {
     return res.send({code: 200, numberOfPlayers: sala.players.length});
 })
@@ -366,71 +382,40 @@ function getIdSocket(x, y){
     }
 }
 
+// 
+
 io.on('connection', socket => {
-    console.log("CLIENT CONNECT >> " + socket.id)
 
-    socket.on('disconnect', () => { console.log("CLIENT DISCONNECTED >> " + socket.id) });
+    console.log("O player " + socket.id + " conectou no sk.")
 
-    socket.on('pushPlayer', nickname => {
-        console.log("PUSH PLAYER: " + nickname)
-        sala.players.push({nick: nickname, sock: socket})
 
-        //console.log(socket)
+    socket.on('disconnect', () => { 
+        console.log("O player " + socket.id + "desconectou.")
+    });
+
+    socket.on('pushPlayer', nick => {
+
+        console.log("PLayer "+ nick + " etrou na sala.")
+        
+        sala.players.push({'nick': nick , 'socket' : socket})
 
         if(sala.players.length == 4){
             iniciar()
-            socket.emit('gameStart', JSON.stringify(sala.posicoes))
-            socket.broadcast.emit('gameStart', JSON.stringify(sala.posicoes))
+            io.emit('renderizaMatriz', JSON.stringify(sala.posicoes))
         }else{
-            socket.emit('newPlayer', sala.players.length)
-            socket.broadcast.emit('newPlayer', sala.players.length)
+            io.emit('newPlayer', sala.players.length)
         }
     })
 
-    socket.on('iniciar', id => {
-        console.log("INICIAR > ID: " + socket.id)
+    socket.on('movimentaHeroi', (x_atual, y_atual, x_mov, y_mov, nome_player) => {
+        var result = movimento(x_atual, y_atual, x_mov, y_mov, nome_player)
 
-        if(sala.players.length == 1)
-            iniciar()
-        
-        socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-    })
-
-    socket.on('movimento', (x_atual, y_atual, x_mov, y_mov) => {
-        
-        var result = movimentar(x_atual, y_atual, x_mov, y_mov)
-
-        console.log("MOVIMENTO : RESULTADO " + result)
-
-        switch(result){
-            // Movimento válido
-            case 0:
-                socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-                socket.broadcast.emit('attMatriz', JSON.stringify(sala.posicoes))
-                break;
-            // Movimento inválido
-            case 1:
-                socket.emit('moveInvalid')
-                break;
-            // Movimento válido, mas o player morreu
-            case 2:
-                socket.emit('died', 'Você perdeu!')
-                socket.broadcast.emit('attMatriz', JSON.stringify(sala.posicoes))
-                break;
-            // Movimento válido com um player derrotado
-            case 3:
-                var id_socket = getIdSocket(x_mov, y_mov)
-
-                if (io.sockets.connected[id_socket]) {
-                    io.sockets.connected[id_socket].emit('died', 'Você perdeu!');
-                }
-                socket.broadcast.emit('attMatriz', JSON.stringify(sala.posicoes))
-                break;
+        if(result === 0 ){
+            socket.emit('invalidMove', "Movimento inválido!")
+        }else{
+            io.emit('renderizaMatriz', JSON.stringify(sala.posicoes))
         }
-            
     })
-
-
 })
 
 server.listen(3001);

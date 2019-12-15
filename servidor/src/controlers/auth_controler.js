@@ -17,20 +17,29 @@ function generateToken(params = {}){
 }
 
 router.get('/infoPlayers/:id', async (req, res) =>{
+
+    console.log(req)
+
     const id = req.params.id
 
-    //console.log("INFO_PLAYER : " + id)
+    console.log("INFO_PLAYER : " + id)
 
-    const user = await User.findOne({_id : id})
+    if(id){
+        const user = await User.findOne({_id : id})
 
-    if (!user)
-        return res.send({ code:45, message: "ID não encontrado"})
+        if (!user)
+            return res.send({ code:45, message: "ID não encontrado"})
 
-    res.send({ 
-        user: user, 
-        token: generateToken({id : user.id}),
-        code: 200
-    });
+        res.send({ 
+            user: user, 
+            token: generateToken({id : user.id}),
+            code: 200
+        });
+    }else{
+        return res.send({ code:50, message: "ID inválido!"})
+    }
+
+    
 })
 
 router.post('/register', async (req,res)=> {
@@ -57,7 +66,9 @@ router.post('/register', async (req,res)=> {
     }
 });
 
-router.post('/authenticate', async (req,res)=> {
+router.post('/authenticate', async (req,res) => {
+    //console.log("CHEGOU AQUI")
+    //console.log(req)
     const { name, password } = req.body;
 
     console.log("Authenticate >> User : " + name + ", Password: " + password)

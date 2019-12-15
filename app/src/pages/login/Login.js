@@ -14,7 +14,7 @@ export default function Login({ navigation }){
         const token = await AsyncStorage.getItem("token")
 
         if(token != null){
-            navigation.navigate("Main")
+            navigation.navigate("Main2")
         }
     }
 
@@ -22,7 +22,7 @@ export default function Login({ navigation }){
 
     async function saveInfo(token, user) {
         await AsyncStorage.setItem("token", "Bearer " + token)
-        await AsyncStorage.setItem("id", user._id)
+        await AsyncStorage.setItem("user", JSON.stringify(user))
     }
 
 
@@ -30,15 +30,15 @@ export default function Login({ navigation }){
         Keyboard.dismiss()
 
         
-        await api.post('/users/authenticate',{
+        await api.post('/users/authenticate', {
              "name": user,
              "password": password
         })
-        .then(response => {
+        .then(async (response) => {
             if(response.data.code == 200){
                 const { token, user } = response.data
-                saveInfo(token, user)
-                navigation.navigate('Main')
+                await saveInfo(token, user)
+                navigation.navigate('Main2')
             }
           })
         .catch(error => {

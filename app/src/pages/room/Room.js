@@ -4,6 +4,7 @@ import { Text, FlatList, View, Dimensions, StyleSheet, Image, TouchableOpacity, 
 import AsyncStorage from '@react-native-community/async-storage'
 import io from 'socket.io-client'
 import imagens from '../../../assets/imagens'
+var md5 = require('md5');
 
 const config = require('../../config/config')
 const utils = require('../../utils/utils')
@@ -13,6 +14,7 @@ import api from '../../services/api'
 let numberGrid = 3
 let numColumns = 3
 var socket = null
+var count = 0
 
 var player_x = 0
 var player_y = 0
@@ -25,6 +27,7 @@ export default function Room({ navigation }){
     const [emit, setEmit] = useState(true)
     const [gameOn, setGameOn] = useState(false)
     const [players, setPlayers] = useState(0)
+    const [matriz, setMatriz] = useState([])
 
     const getUser = async () => {
         const nick = await AsyncStorage.getItem('nickname')
@@ -75,7 +78,8 @@ export default function Room({ navigation }){
             }
         }
 
-        setData([])
+        if(JSON.stringify(list)  )
+
         setData(list)
         //console.log(matriz)
     }
@@ -88,8 +92,26 @@ export default function Room({ navigation }){
         setEmit(false)
     }
 
-    socket.on('attMatriz', matriz => {
-        renderizarMatriz(JSON.parse(matriz))
+    const atualizarMatriz = async () => {
+        await api.get('/game/getMatriz').then(response => {
+            if(response.data.code == 200){
+                var { mat } = response.data
+                if(mat != JSON.stringify(matriz)){
+                    mat = JSON.parse(mat)
+                    setMatriz(mat)
+                    renderizarMatriz(mat)
+                }
+            }
+          })
+       .catch(error => {
+            alert(error)
+       })
+    }
+
+    socket.on('getMatriz', () => {
+        utils.showToastShort("GET MATRIZ : " + count)
+        count += 1
+        atualizarMatriz()
     })
 
     socket.on('died', message => {
@@ -102,8 +124,11 @@ export default function Room({ navigation }){
     })
 
     socket.on('gameStart', matriz => {
-        renderizarMatriz(JSON.parse(matriz))
-        setGameOn(true)
+        if(matriz != JSON.stringify(matriz)){
+            setMatriz(JSON.parse(matriz))
+            renderizarMatriz(JSON.parse(matriz))
+            setGameOn(true)
+        }
     })
 
     socket.on('moveInvalid' , () => {
@@ -111,20 +136,23 @@ export default function Room({ navigation }){
     })
 
     const move = async (item) => {
-        await api.post('/game/movimentar', {
-            x_atual: player_x,
-            y_atual: player_y,
-            x_mov: item.x,
-            y_mov: item.y
-        }).then(response => {
-            if(response.data.code == 1){
-                const { message } = response.data
-                utils.showToastShort(message)
-            }
-          })
-        .catch(error => {
-            alert(error)
-        })
+        
+        socket.emit('movimentar', player_x, player_y, item.x, item.y)
+
+        // await api.post('/game/movimentar', {
+        //     x_atual: player_x,
+        //     y_atual: player_y,
+        //     x_mov: item.x,
+        //     y_mov: item.y
+        // }).then(response => {
+        //     if(response.data.code == 1){
+        //         const { message } = response.data
+        //         utils.showToastShort(message)
+        //     }
+        //   })
+        // .catch(error => {
+        //     alert(error)
+        // })
     }
 
     function exitOfGame(){
