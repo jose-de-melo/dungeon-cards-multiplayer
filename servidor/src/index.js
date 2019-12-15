@@ -3,9 +3,6 @@ const options = {
     port: process.env.PORT || 3000
 };
 
-const server = require('http').createServer();
-const io = require('socket.io')(server);
-
 const Card = require('./models/card');
 
 const express = require('express');
@@ -32,6 +29,10 @@ const sala = utils.criarSala()
 
 const app = express();
 
+
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
 
@@ -47,18 +48,15 @@ router.get('/', async (req, res) => {
 
 async function iniciar(){
     sala.posicoes[1][1] = utils.generatePlayer(1,1, sala.players[0].nick)
-    sala.posicoes[1][4] = utils.generatePlayer(1,4, sala.players[1].nick)
-    sala.posicoes[4][1] = utils.generatePlayer(4,1, sala.players[2].nick)
-    sala.posicoes[4][4] = utils.generatePlayer(4,4, sala.players[3].nick)
+    //sala.posicoes[1][4] = utils.generatePlayer(1,4, sala.players[1].nick)
+    //sala.posicoes[4][1] = utils.generatePlayer(4,1, sala.players[2].nick)
+    sala.posicoes[4][4] = utils.generatePlayer(4,4, sala.players[1].nick)
 
     for(i=0; i<6;i++){ 
         for(j=0; j<6;j++){
             if(!sala.posicoes[i][j]){
                 utils.vec_func.sort(utils.randOrd);
                 sala.posicoes[i][j] = utils.vec_func[0](i, j);
-            }
-            else{
-                console.log(sala.posicoes[i][j])
             }
         }
     }
@@ -135,9 +133,6 @@ router.post('/movimentar', (req, res) =>{
         
         //verifica se o monstro nao morreu
         if(sala.posicoes[x_mov][y_mov].life>0){
-            //se morreu, retorna a matriz
-            //console.log("CAIU NO MONSTRO MORREU")
-            //io.emit('attMatriz', JSON.stringify(sala.posicoes));
             io.emit('attMatriz', JSON.stringify(sala.posicoes));
         }
 
@@ -216,6 +211,7 @@ router.post('/movimentar', (req, res) =>{
     //console.log(socket)
 
     //socket.emit('attMatriz', JSON.stringify(sala.posicoes))
+    console.log("MOVE DETECTADO")
     io.emit('attMatriz', JSON.stringify(sala.posicoes))
 
     return res.send({code:0, message: "Movimento válido."})
@@ -342,6 +338,10 @@ function movimentar(x_atual, y_atual, x_mov, y_mov) {
     return 0
 }
 
+router.get('/getMatriz', async (req, res) => {
+    res.send({code: 200, mat: JSON.stringify(sala.posicoes)})
+})
+
 router.get('/numberOfPlayersOnRoom', async (req, res) => {
     return res.send({code: 200, numberOfPlayers: sala.players.length});
 })
@@ -366,6 +366,15 @@ function getIdSocket(x, y){
     }
 }
 
+function notificarPlayers(event, value){
+    for(i in sala.players){
+        if(value)
+            sala.players[i].sock.emit(event, value)
+        else
+            sala.players[i].sock.emit(event)
+    }
+}
+
 io.on('connection', socket => {
     console.log("CLIENT CONNECT >> " + socket.id)
 
@@ -373,30 +382,20 @@ io.on('connection', socket => {
 
     socket.on('pushPlayer', nickname => {
         console.log("PUSH PLAYER: " + nickname)
+        socket.join('game')
         sala.players.push({nick: nickname, sock: socket})
 
-        //console.log(socket)
+        console.log("CLIENTS CONNECTED: " + io.engine.clientsCount)
 
-        if(sala.players.length == 4){
+        io.in('game').emit('newPlayer', sala.players.length)
+
+        if(sala.players.length == 2){
             iniciar()
-            socket.emit('gameStart', JSON.stringify(sala.posicoes))
-            socket.broadcast.emit('gameStart', JSON.stringify(sala.posicoes))
-        }else{
-            socket.emit('newPlayer', sala.players.length)
-            socket.broadcast.emit('newPlayer', sala.players.length)
+            notificarPlayers('gameStart', JSON.stringify(sala.posicoes))
         }
     })
 
-    socket.on('iniciar', id => {
-        console.log("INICIAR > ID: " + socket.id)
-
-        if(sala.players.length == 1)
-            iniciar()
-        
-        socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-    })
-
-    socket.on('movimento', (x_atual, y_atual, x_mov, y_mov) => {
+    socket.on('movimentar', (x_atual, y_atual, x_mov, y_mov) => {
         
         var result = movimentar(x_atual, y_atual, x_mov, y_mov)
 
@@ -405,8 +404,9 @@ io.on('connection', socket => {
         switch(result){
             // Movimento válido
             case 0:
-                socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-                socket.broadcast.emit('attMatriz', JSON.stringify(sala.posicoes))
+                console.log("NOTIFICANDO PLAYERS")
+                notificarPlayers('getMatriz', null)
+                console.log("PLAYERS NOTIFICADOS")
                 break;
             // Movimento inválido
             case 1:
@@ -415,7 +415,7 @@ io.on('connection', socket => {
             // Movimento válido, mas o player morreu
             case 2:
                 socket.emit('died', 'Você perdeu!')
-                socket.broadcast.emit('attMatriz', JSON.stringify(sala.posicoes))
+                socket.to('game').emit('getMatiz')
                 break;
             // Movimento válido com um player derrotado
             case 3:
@@ -424,7 +424,7 @@ io.on('connection', socket => {
                 if (io.sockets.connected[id_socket]) {
                     io.sockets.connected[id_socket].emit('died', 'Você perdeu!');
                 }
-                socket.broadcast.emit('attMatriz', JSON.stringify(sala.posicoes))
+                io.on('game').emit('attMatriz', JSON.stringify(sala.posicoes))
                 break;
         }
             
