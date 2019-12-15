@@ -124,7 +124,6 @@ const cria_player = (x, y, nick) =>{
     return p;
 }
 
-
 const vec_func = [cria_moeda,cria_moeda, cria_moeda, cria_moeda, cria_monstro, cria_monstro, cria_pot,cria_pot,cria_pot, cria_arma, cria_monstro, ]
 
 const router = express.Router();
@@ -146,7 +145,7 @@ router.post('/join', async (req,res)=> {
 
     sala.players.push({nickname, socket})   
     
-    console.log("Cadastrando: "+ nickname+ "   Numero de jogadores:"+sala.players.length)
+    console.log("Cadastrando: "+ nickname+ "   Numero de jogadores: "+sala.players.length)
 
     return res.send({ status: "O player entrou na sala.", num_players: (nplayers+1)})
 });
@@ -174,7 +173,8 @@ router.get('/iniciar', async (req, res) => {
    
    
     // ATUALIZA MATRIZ PRO SOCKET
-    return res.send({matriz: sala.posicoes}) 
+    io.emit()
+    return res.send({message: 1}) 
 });
 
 //Esse é o metodo q movimenta o jogador
@@ -296,6 +296,7 @@ router.post('/movimento', (req, res) => {
 });
 
 app.use(cors);
+app.use(router);
 
 app.listen(options.port, function(){
     console.log(`Servidor rodando na porta ${options.port}`)
@@ -316,8 +317,6 @@ io.on('connection', socket => {
         sala.players.push({nickname: })
 
         if(sala.players.length == 4){
-            console.log("4 PLAYERS")
-            iniciar()
             socket.emit('attMatriz', JSON.stringify(sala.posicoes))
             socket.emit('gameStart', sala.players.length)
         }
