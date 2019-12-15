@@ -3,31 +3,33 @@ const options = {
     port: process.env.PORT || 3000
 };
 
+//Bibliotecas externas
 const bodyParser = require('body-parser');
-const cors = require('./config/cors')
-const utils = require('./utils')
+const cors = require('./config/cors');
+const utils = require('./utils');
 const Sala = require('./models/sala');
 const Card = require('./models/card');
 
+require('./controlers/auth_controler')(app);
 
+//Sockets
 var express = require('express');
 const app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
-
-
-require('./controlers/auth_controler')(app);
-
+//Sala possui matriz e players // 8 monstros, 6 potes, 4 armas, 14 moedas
 const sala = new Sala({
     posicoes:[[],[],[],[],[],[]], 
     players:[]
 });
-/// 8 monstros, 6 potes, 4 armas, 14 moedas
 
+//Gerar numeros aleatorios
 function randOrd() {
     return (Math.round(Math.random())-0.5);
 }
+
+const QTD_PLAYERS = 4;
 
 // Valores de recompensa
 const CURA_POTION = 2;
@@ -43,28 +45,30 @@ var RECOMPENSA_MONTRO = 5;
 var LIMITE_UPLOAD = 100;
 const CONST_UP = 2; 
 
+//Vetores de geração aleatoria
 var monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morcego","zumbi"];
+var herois  = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"];
+var armas  = [];
+const vec_func = [cria_moeda,cria_moeda, cria_moeda, cria_moeda, cria_monstro, cria_monstro, cria_pot,cria_pot,cria_pot, cria_arma, cria_monstro, ];
 
-var herois  = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
-
-var armas  = []
-
-
+//Middleware, trabalhando com JSON
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
 
 const cria_monstro = (x, y) =>{
     monster = new Card();
     monster.tipo = "monstro";
-    monstros.sort(randOrd);
-    monster.name = monstros[0];
-    monster.image = monstros[0];
     monster.level = 1;
     monster.life = VIDA_MONSTRO;
     monster.damage = DANO_MONSTRO;
     monster.bounty = RECOMPENSA_MONTRO;
     monster.x = x;
     monster.y = y;
+    // Parte aleatória da geração de monstros
+    monstros.sort(randOrd);
+    monster.name = monstros[0];
+    monster.image = monstros[0];
+    
     return monster;
 }
 
@@ -98,16 +102,18 @@ const cria_moeda = (x, y) =>{
 
 const cria_arma = (x, y) =>{
     arma = new Card();
-    armas.sort(randOrd);
-    arma.name = armas[0];
     arma.tipo = "arma";
-    arma.image = armas[0];
     arma.level = 0;
     arma.life = 0;
     arma.x = x;
     arma.y = y;
     arma.damage = 0;
     arma.bounty = 0;
+    //Parte aleatoria da geração de armas
+    armas.sort(randOrd);
+    arma.name = armas[0];
+    arma.image = armas[0];
+
     return arma;
 }
 
@@ -127,25 +133,25 @@ const cria_player = (x, y, nick, pos) =>{
     return p;
 }
 
-const vec_func = [cria_moeda,cria_moeda, cria_moeda, cria_moeda, cria_monstro, cria_monstro, cria_pot,cria_pot,cria_pot, cria_arma, cria_monstro, ]
-
 //Esse é o metodo q vai iniciar a partida
 const iniciar = () =>{
+    //Sorteia a ordem e herois para os jogadores
     sala.players.sort(randOrd);
     herois.sort(randOrd);
+
+    //Posicioando jogadores
     sala.posicoes[1][1] = cria_player(1,1, sala.players[0].nick, 0)
     sala.posicoes[1][4] = cria_player(1,4, sala.players[1].nick, 1)  
-    //sala.posicoes[4][1] = cria_player(4,1, sala.players[2].nick)  
-    //sala.posicoes[4][4] = cria_player(4,4, sala.players[3].nick)  
-
+    sala.posicoes[4][1] = cria_player(4,1, sala.players[2].nick, 2)  
+    sala.posicoes[4][4] = cria_player(4,4, sala.players[3].nick, 3)  
 
     for(i=0; i<6;i++){ 
         for(j=0; j<6;j++){
-            if(!sala.posicoes[i][j]){
+            if(!sala.posicoes[i][j]){ //se ainda não foi prechido, gera qualquer coisa.
                 vec_func.sort(randOrd);
                 sala.posicoes[i][j] = vec_func[0](i, j);
             }else{
-                console.log(i, j)
+                //console.log(i, j) //é heroi
             }
         }
     } 
@@ -169,161 +175,154 @@ const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
     if(dif_x+dif_y !=1)
         return 0;
 
-    console.log(nome_player)
+    //console.log(nome_player)
+    var p_name;
 
-
+    //Verifica se o player ainda está vivo
     var achou = 0;
     for(i in sala.players){
         if (sala.players[i].nick === nome_player){
+            p_name = nome_player;
             achou = 1
             break;
         }
     }
+    if (achou == 0){ return 0; } //Se não achou o player ele está morto
 
-    if (achou ==0){
-        return 0;
-    }
-    //Sempre que a quantidade de moedas coletas atingir 100, o nível dos mosntros recebe 0.
+    //Salvando posições
+    var pos_atual = sala.posicoes[x_atual][y_atual];
+    var pos_mov = sala.posicoes[x_mov][y_mov];
+
+    //Sempre que a quantidade de moedas coletas atingir 100, o nível dos monstros aumenta.
     if (MOEDAS_GERAL == LIMITE_UPLOAD - 1){
         DANO_MONSTRO *= CONST_UP;
         VIDA_MONSTRO *= CONST_UP;
         RECOMPENSA_MONTRO *= CONST_UP;
-
+        //Diminui a cura até 1
         if(CURA_POTION > 1) CURA_POTION = CURA_POTION/2;
-
+        // Zera o contador
         MOEDAS_GERAL = 0;
     }
     
     //Se achou cura    
-    if(sala.posicoes[x_mov][y_mov].name == 'poção'){
-        sala.posicoes[x_atual][y_atual].life += CURA_POTION;
+    if(pos_mov.name == 'poção'){
+        pos_atual.life += CURA_POTION;
     }    
+
     // Se achou arma
-    if(sala.posicoes[x_mov][y_mov].tipo == 'arma'){
-        if(sala.posicoes[x_atual][y_atual].name == sala.posicoes[x_mov][y_mov].name){
-            if( sala.posicoes[x_atual][y_atual].tipo == "heroi_armado"){
-                 sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
+    if(pos_mov.tipo == 'arma'){
+        if(pos_atual.name == pos_mov.name){ // A arma é do heroi
+            if( pos_atual.tipo == "heroi_armado"){ //Heroi já está armado => recompensa.
+                 pos_atual.bounty += RECOMPENSA_GUN;
                  MOEDAS_GERAL += RECOMPENSA_GUN;
-            }else{
-                sala.posicoes[x_atual][y_atual].damage = (sala.posicoes[x_atual][y_atual].damage*2)
-                sala.posicoes[x_atual][y_atual].tipo = "heroi_armado";
+            }else{ // Heroi não armado => dobra o dano
+                pos_atual.damage = (pos_atual.damage*2)
+                pos_atual.tipo = "heroi_armado";
             }
-        }else{
-            sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
+        }else{ // Arma não é do heroi
+            pos_atual.bounty += RECOMPENSA_GUN;
             MOEDAS_GERAL += RECOMPENSA_GUN;
         }
     }
     
     //Se achou moeda
-    if(sala.posicoes[x_mov][y_mov].name == 'moeda'){
-        sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_COIN;
+    if(pos_mov.name == 'moeda'){
+        pos_atual.bounty += RECOMPENSA_COIN;
         MOEDAS_GERAL += RECOMPENSA_COIN;
     }
     
     //Se achou monstro
-    if(sala.posicoes[x_mov][y_mov].tipo == 'monstro'){
-
-        //decrementa a vida do monstro, com o seu dano
-        sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
-
-        //decrementa a sua vida, de acordo com o dano do monstro
-        sala.posicoes[x_atual][y_atual].life -= sala.posicoes[x_mov][y_mov].damage;
+    if(pos_mov.tipo == 'monstro'){
+        pos_mov.life -= pos_atual.damage; //decrementa a vida do monstro, com o seu dano
+        pos_atual.life -= pos_mov.damage; //decrementa a sua vida, de acordo com o dano do monstro
         
-        //verifica se o monstro nao morreu
-        if(sala.posicoes[x_mov][y_mov].life>0){
-            //se nao morreu morreu, retorna a matriz
-            return 1
+        //Se monstro morreu, heroi recebe recompensa
+        if(pos_mov.life<0){
+            pos_atual.bounty += pos_mov.bounty;
         }
 
         //verifica se o heroi morreu
-        if(sala.posicoes[x_atual][y_atual].life<=0){
-            console.log(sala.posicoes[x_atual][x_atual].nick+"MORREU")
-            for(i in sala.players){
-                if (sala.players[i].nick === sala.posicoes[x_atual][y_atual].nick ){
+        if(pos_atual.life<=0){
+            console.log(pos_atual.nick+"MORREU")
+            for(i in sala.players)
+                if (sala.players[i].nick === pos_atual.nick ){
                     vec_func.sort(randOrd);
-                    sala.posicoes[x_atual][y_atual] = vec_func[0](x_atual, y_atual);
+                    sala.posicoes[x_atual][y_atual] = vec_func[0](x_atual, y_atual); //NÃO alterar para pos_atual
                     sala.players[i].socket.emit('died',  JSON.stringify(sala.posicoes));
-                    sala.players.splice(i, 1)
-                    console.log(sala.posicoes[x_atual][y_atual].nick , " MORREU");
+                    sala.players.splice(i, 1);
                     break;
                 }
-            }
-            return 2
+            return 2;
         }
-
-        sala.posicoes[x_atual][y_atual].bounty += sala.posicoes[x_mov][y_mov].bounty;
     }    
 
-    //Verifica se bateu em um heroi
-    if(sala.posicoes[x_mov][y_mov].tipo == 'heroi' || sala.posicoes[x_mov][y_mov].tipo == 'heroi_armado' ){
-        sala.posicoes[x_mov][y_mov].life -= sala.posicoes[x_atual][y_atual].damage;
+    //Se achou heroi
+    if(pos_mov.tipo == 'heroi' || pos_mov.tipo == 'heroi_armado' ){
+        pos_mov.life -= pos_atual.damage;
 
-        if(sala.posicoes[x_mov][y_mov].life<=0){
-            console.log(sala.posicoes[x_mov][y_mov].nick+"MORREU")
-            for(i in sala.players){
-                if (sala.players[i].nick === sala.posicoes[x_mov][y_mov].nick ){
+        //Se o heroi atacado morreu
+        if(pos_mov.life<=0){
+            console.log(pos_mov.nick+"MORREU");
+            for(i in sala.players)
+                if (sala.players[i].nick === pos_mov.nick ){
                     vec_func.sort(randOrd);
-                    sala.posicoes[x_mov][x_mov] = vec_func[0](x_mov, y_mov);
+                    sala.posicoes[x_mov][y_mov] = vec_func[0](x_mov, y_mov); //NÃO alterar para pos_mov
                     sala.players[i].socket.emit('died', JSON.stringify(sala.posicoes));
-                    sala.players.splice(i, 1)
-                    console.log(sala.posicoes[x_mov][y_mov].nick , " MORREU");
+                    sala.players.splice(i, 1);
                     break;
                 }
-            }
-            return 2
+            return 2;
         }
-        return 1
+        return 1;
     }    
    
-    //a posição que deseja mover recebe o objeto q esta na posição atual.
-    //sala.posicoes[x_mov][y_mov] =  
-    x =  parseInt((sala.posicoes[x_atual][y_atual].bounty/10)-(sala.posicoes[x_atual][y_atual].level));
+    //Verificando se o player subiu de nível.
+    x =  parseInt((pos_atual.bounty/10)-(pos_atual.level));
     sala.posicoes[x_atual][y_atual].damage += x;
     sala.posicoes[x_atual][y_atual].life += (x*2);
-    sala.posicoes[x_atual][y_atual].level = parseInt(sala.posicoes[x_atual][y_atual].bounty/10);
+    sala.posicoes[x_atual][y_atual].level = parseInt(pos_atual.bounty/10);
 
-    //atualizou o x e y, do atual pro novo
+    //Atualizando o x e y, do atual pro novo => assim realizando o movimento
     sala.posicoes[x_atual][y_atual].x = x_mov;
     sala.posicoes[x_atual][y_atual].y = y_mov;
-
     sala.posicoes[x_mov][y_mov] = sala.posicoes[x_atual][y_atual];
+
+    //Gerando uma carta aleatória na posição que ficou vazia
     vec_func.sort(randOrd);
     sala.posicoes[x_atual][y_atual] = vec_func[0]( x_atual, y_atual);
 
-    return 1
+    return 1;
 }
   
 io.on('connection', socket => {
+    console.log("Socket:",socket.id,"CONECTADO !!");
 
-    console.log("O player " + socket.id + " conectou no sk.")
-
-
+    //Desconectado.
     socket.on('disconnect', () => { 
-        console.log("O player " + socket.id + "desconectou.")
+        console.log("Socket:",socket.id,"DESCONECTADO !!");
     });
 
+    //Player entrou na sala
     socket.on('entraSala', nick => {
-
-        console.log("PLayer "+ nick+ " etrou na sala.")
+        console.log("Player",nick,"ENTROU NA SALA !!");
         
         sala.players.push({'nick': nick , 'socket' : socket})
-
-        if(sala.players.length == 2){
+        if(sala.players.length == QTD_PLAYERS){ //se a sala encheu => inicia o jogo
             iniciar()
             io.emit('renderizaMatriz', JSON.stringify(sala.posicoes))
-        }else{
+        }else{ // se ainda não encheu => aguarda
             io.emit('cadastraPlayer', sala.players.length)
         }
     })
 
+    // Player realizou movimento
     socket.on('movimentaHeroi', (x_atual, y_atual, x_mov, y_mov, nome_player) => {
         movimento(x_atual, y_atual, x_mov, y_mov, nome_player)
         io.emit('renderizaMatriz', JSON.stringify(sala.posicoes))
     })
 })
 
-
-
+//Inicia o server para escutar na porta 3000
 server.listen(3000, function(){
-    console.log('girando e Rodando Silvio : qual porta vc vai escolher?  3000');
+    console.log('Girando e Rodando, Silvio! Qual porta vc vai escolher? 3000');
 });
