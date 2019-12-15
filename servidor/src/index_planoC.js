@@ -107,14 +107,13 @@ const cria_arma = (x, y) =>{
     return arma;
 }
 
-const cria_player = (x, y, nick) =>{
+const cria_player = (x, y, nick, pos) =>{
     p = new Card();
-    herois.sort(randOrd);
-    p.name = herois[0];
-    armas.push(herois[0]);
+    p.name = herois[pos];
+    armas.push(herois[pos]);
     p.tipo = "heroi";
     p.nick = nick;
-    p.image = herois[0];
+    p.image = herois[pos];
     p.level = 0;
     p.life = 15;
     p.damage = 2;
@@ -153,10 +152,11 @@ router.post('/join', async (req,res)=> {
 //Esse é o metodo q vai iniciar a partida
 router.get('/iniciar', async (req, res) => {
     sala.players.sort(randOrd);
-    sala.posicoes[1][1] = cria_player(1,1, sala.players[0].nickname)
-    sala.posicoes[1][4] = cria_player(1,4, sala.players[1].nickname)  
-    sala.posicoes[4][1] = cria_player(4,1, sala.players[2].nickname)  
-    sala.posicoes[4][4] = cria_player(4,4, sala.players[3].nickname)  
+    herois.sort(randOrd);
+    sala.posicoes[1][1] = cria_player(1,1, sala.players[0].nickname, 0)
+    sala.posicoes[1][4] = cria_player(1,4, sala.players[1].nickname, 1)  
+    sala.posicoes[4][1] = cria_player(4,1, sala.players[2].nickname, 2)  
+    sala.posicoes[4][4] = cria_player(4,4, sala.players[3].nickname, 3)  
 
 
     for(i=0; i<6;i++){ 
@@ -169,9 +169,6 @@ router.get('/iniciar', async (req, res) => {
             }
         }
     }
-    
-   
-   
     // ATUALIZA MATRIZ PRO SOCKET
     return res.send({matriz: sala.posicoes}) 
 });
