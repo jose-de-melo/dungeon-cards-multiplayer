@@ -136,18 +136,17 @@ const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
                     utils.vec_func.sort(utils.randOrd);
                     sala.posicoes[x_mov][y_mov] = utils.vec_func[0](x_mov, y_mov); // NÃO trocar para pos_mov
                     sala.players[i].socket.emit('died', JSON.stringify(sala.posicoes));
-                    sala.players.splice(i, 1)
-                    return 2;
+                    sala.players.splice(i, 1);
                 }
             }
             // Ultimo herói vivo => vence a partida
             if (sala.players.length == 1){
-                for(i in sala.players)
-                    if (sala.players[i].nick === pos_atual.nick ){
-                        sala.players[i].socket.emit('win', JSON.stringify(sala.posicoes));
-                        return 3;
-                    }
+                console.log("VENCEDOR:",sala.players[0]);
+                if (sala.players[0].nick === pos_atual.nick ){
+                    sala.players[0].socket.emit('win', JSON.stringify(sala.posicoes));
+                }
             }
+            return 2;
         }
         return 1;
     }    

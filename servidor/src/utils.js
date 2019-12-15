@@ -23,7 +23,7 @@ exports.RECOMPENSA_GUN = 1;
 exports.MOEDAS_GERAL = 0;
 exports.DANO_MONSTRO = 2;
 exports.VIDA_MONSTRO = 6;
-exports.RECOMPENSA_MONTRO = 5;
+exports.RECOMPENSA_MONSTRO = 5;
 
 // Quando as MOEDAS_GERAL atingirem esse valor o DANO_MONSTRO e VIDA_MOSTRO, são multiplicados pelo valor de CONST_UP
 exports.LIMITE_UPLOAD = 50;
@@ -57,15 +57,17 @@ exports.generateCoins = (x, y) => {
 exports.generateMonsters = (x, y) =>{
     monster = new Card();
     monster.tipo = "monstro";
+    monster.level = 1;
+    monster.life = this.VIDA_MONSTRO;
+    monster.damage = this.DANO_MONSTRO;
+    monster.bounty = this.RECOMPENSA_MONSTRO;
+    monster.x = x;
+    monster.y = y;
+
+    // Parte de gerar monstro aleatorio
     this.monstros.sort(this.randOrd);
     monster.name = this.monstros[0];
     monster.image = this.monstros[0];
-    monster.level = 1;
-    monster.life = 6;
-    monster.damage = 2;
-    monster.bounty = 5;
-    monster.x = x;
-    monster.y = y;
     return monster;
 }
 
