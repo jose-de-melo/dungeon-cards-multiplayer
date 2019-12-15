@@ -35,8 +35,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
 
 require('./controlers/auth_controler')(app);
-//require('./controlers/sala_controler')(app);
-
 
 const router = express.Router();
 
@@ -372,25 +370,15 @@ app.get('/', (req, res) =>{
 
 app.listen(options.port, function(){
     console.log(`Servidor rodando na porta ${options.port}`)
-})
-
-
-function getIdSocket(x, y){
-    for(i = 0; i < sala.players.length; i++){
-        if(sala.posicoes[x][y].nickname = sala.players[i].nick)
-            return sala.players[i].id_socket
-    }
-}
-
-// 
+}) 
 
 io.on('connection', socket => {
 
-    console.log("O player " + socket.id + " conectou no sk.")
+    console.log("O player " + socket.id + " conectou no socket")
 
 
     socket.on('disconnect', () => { 
-        console.log("O player " + socket.id + "desconectou.")
+        console.log("O player " + socket.id + " desconectou.")
     });
 
     socket.on('pushPlayer', nick => {
@@ -399,7 +387,7 @@ io.on('connection', socket => {
         
         sala.players.push({'nick': nick , 'socket' : socket})
 
-        if(sala.players.length == 4){
+        if(sala.players.length === 4 ){
             iniciar()
             io.emit('renderizaMatriz', JSON.stringify(sala.posicoes))
         }else{
