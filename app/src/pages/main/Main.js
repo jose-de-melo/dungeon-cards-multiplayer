@@ -4,7 +4,6 @@ import { Text, View, StyleSheet, Image, TouchableOpacity, StatusBar, YellowBox }
 const utils = require('../../utils/utils')
 
 import AsyncStorage from '@react-native-community/async-storage'
-import io from 'socket.io-client'
 
 
 YellowBox.ignoreWarnings(['Unrecognized WebSocket']);
@@ -20,18 +19,6 @@ export default function Main({ navigation }){
 
     const setUser = async (nickname) => {
         await AsyncStorage.setItem('nickname', nickname)
-    }
-
-    function testSocket(){
-        const socket = io('http://192.168.1.107:3001');
-
-        console.log(socket.id)
-
-        socket.emit('iniciar', socket.id)
-        
-        socket.on('attMatriz', function(message){
-                alert(message)
-        })
     }
 
     const newGame = async () => {

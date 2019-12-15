@@ -3,9 +3,12 @@ import { Text, FlatList, View, Dimensions, StyleSheet, Image, TouchableOpacity, 
 
 import AsyncStorage from '@react-native-community/async-storage'
 import io from 'socket.io-client'
-import imagens  from './../../../assets/imagens'
+import imagens from '../../../assets/imagens'
 
 const config = require('../../config/config')
+const utils = require('../../utils/utils')
+
+import api from '../../services/api'
 
 let numberGrid = 3
 let numColumns = 3
@@ -30,19 +33,15 @@ export default function Room({ navigation }){
 
     getUser()
 
-    const renderizarMatriz = async (matriz) => {
-        
-        await getUser()
-        //console.log(user)
-        
+    function renderizarMatriz(matriz){
+        getUser()
+
         // Encontrar jogador
         for (var i = 0; i < matriz.length; i++) {
             for (var j = 0; j < matriz[i].length; j++) {
                 let item = matriz[i][j]
-                console.log(item)
                 if (item.nick == user) {
-                    console.log("ENTROU")
-                    //console.log(item);
+                    console.log(item)
                     player_x = item.x
                     player_y = item.y
                 }
@@ -68,19 +67,15 @@ export default function Room({ navigation }){
         }
 
         var list = []
-        //console.log('inicio', x_view)
-        //console.log('inicio', y_view)
 
         for(var x=x_view; x < (x_view+3); x++){
             for(var y=y_view; y < (y_view+3); y++){
-                
                 let item = matriz[x][y]
-                console.log(item)
                 list.push(item)
-                //console.log(x, y)
             }
         }
 
+        setData([])
         setData(list)
         //console.log(matriz)
     }
@@ -90,18 +85,19 @@ export default function Room({ navigation }){
 
     if(user != '' && emit){    
         socket.emit('pushPlayer', user)
-        socket.emit('pushPlayer', 'Ricardo')
-        socket.emit('pushPlayer', 'Domith')
-        socket.emit('pushPlayer', 'Lucas')
         setEmit(false)
     }
 
     socket.on('attMatriz', matriz => {
-        setData(JSON.parse(matriz))
+        renderizarMatriz(JSON.parse(matriz))
+    })
+
+    socket.on('died', message => {
+        utils.showToastLong(message)
+        socket.close()
     })
 
     socket.on('newPlayer', numberOfPlayers => {
-        //console.log("NEW PLAYER")
         setPlayers(numberOfPlayers)
     })
 
@@ -110,8 +106,25 @@ export default function Room({ navigation }){
         setGameOn(true)
     })
 
-    function move(item, index){
-        socket.emit('move', index)
+    socket.on('moveInvalid' , () => {
+        utils.showToastShort('Movimento inválido!')
+    })
+
+    const move = async (item) => {
+        await api.post('/game/movimentar', {
+            x_atual: player_x,
+            y_atual: player_y,
+            x_mov: item.x,
+            y_mov: item.y
+        }).then(response => {
+            if(response.data.code == 1){
+                const { message } = response.data
+                utils.showToastShort(message)
+            }
+          })
+        .catch(error => {
+            alert(error)
+        })
     }
 
     function exitOfGame(){
@@ -119,9 +132,9 @@ export default function Room({ navigation }){
     }
 
     const renderItem = ({ item, index }) => {
-        console.log(item)
+        console.log(item.tipo, item.image)
         return (
-            <TouchableOpacity style={styles.item} onPress={exitOfGame}>
+            <TouchableOpacity style={styles.item} onPress={() => move(item)}>
                  <View>
                     <Image
                         source={imagens[item.tipo][item.image]}

@@ -40,6 +40,10 @@ const imagens =  {
         moeda: require('./item/moeda.png'),
         potion: require('./item/potion.png'),
     }, 
+    icones:{
+        life: require('./icones/life.png'),
+        damage: require('./icones/damage.png'),
+    }, 
 
 }
 
