@@ -1,6 +1,14 @@
+const options = {
+    host: "localhost",
+    port: process.env.PORT || 3000
+};
+
 const express = require('express');
-const Sala = require('../models/sala');
-const Card = require('../models/card');
+const bodyParser = require('body-parser');
+const cors = require('./config/cors')
+const utils = require('./utils')
+const Sala = require('./models/sala');
+const Card = require('./models/card');
 
 const sala = new Sala({
     posicoes:[[],[],[],[],[],[]], 
@@ -31,6 +39,14 @@ var monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morce
 var herois  = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
 
 var armas  = []
+
+
+const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false}));
+
+require('./controlers/auth_controler')(app);
 
 
 const cria_monstro = (x, y) =>{
@@ -108,45 +124,15 @@ const cria_player = (x, y, nick) =>{
     return p;
 }
 
-
 const vec_func = [cria_moeda,cria_moeda, cria_moeda, cria_moeda, cria_monstro, cria_monstro, cria_pot,cria_pot,cria_pot, cria_arma, cria_monstro, ]
 
 const router = express.Router();
 
-/*
-router.get('/', async (req,res)=> {
-    console.log("retornando salas...")
-    const salas = await Sala.find();
-    return res.send(salas);
+router.get('/', async (req, res) => {
+    console.log('karai borrachando');
+    return res.send('Karai borracha');
 });
 
-router.get('/create', async (req,res)=> {
-    console.log("criando sala...")
-    try {
-        const sala = await Sala.create({
-            posicoes:[[],[],[],[],[],[]], 
-            players:[]
-        });
-
-        return res.send({ sala }) 
-
-    }catch (err){
-        console.log(err);
-        return res.status(400).send({error : 'Falha ao cadastrar sala.'});
-    }
-});
-
-router.delete('/:id', async (req,res)=> {
-    const id = req.params.id
-
-    const resp = await Sala.deleteOne({ _id: id })
-    if (!resp.deletedCount)
-        return res.status(400).send({ error : "Sala não cadastrada.", id});
-
-    return res.send({status: "deletada", sala: id}) 
-});
-
-*/
 router.post('/join', async (req,res)=> {
     const { nickname, socket} = req.body;
 
@@ -159,14 +145,9 @@ router.post('/join', async (req,res)=> {
 
     sala.players.push({nickname, socket})   
     
-    console.log("Cadastrando: "+ nickname+ "   Numero de jogadores:"+sala.players.length)
+    console.log("Cadastrando: "+ nickname+ "   Numero de jogadores: "+sala.players.length)
 
     return res.send({ status: "O player entrou na sala.", num_players: (nplayers+1)})
-});
-
-router.get('/', async (req, res) => {
-    console.log('karai borrachandoasdasdsad');
-    return res.send('Karai borrachaasdasdsadda');
 });
 
 //Esse é o metodo q vai iniciar a partida
@@ -313,12 +294,37 @@ router.post('/movimento', (req, res) => {
     return res.send({message: 1, matriz: sala.posicoes})
 });
 
-//Função que pode ser usada caso opte por ter turnos.
-router.get('/rolar_dado', async (req, res) => {
-    const dado =  [1, 2, 2, 3, 3, 3, 4, 4, 5, 6]
-    dado.sort(randOrd)
-    return res.send({ jogadas : dado[0]}) 
-});
+app.use(cors);
+app.use(router);
 
-module.exports = app => app.use('/game', router);
-    
+app.listen(options.port, function(){
+    console.log(`Servidor rodando na porta ${options.port}`)
+})
+
+
+/* const server = require('http').createServer();
+const io = require('socket.io')(server);
+
+
+io.on('connection', socket => {
+
+    socket.on('disconnect', () => { console.log("Cliente " + socket.id + " desconectado.") });
+
+    socket.on('pushPlayer', nickname => {
+        console.log("Adicionando o player " + nickname)
+        
+        sala.players.push({nickname: })
+
+        if(sala.players.length == 4){
+            socket.emit('attMatriz', JSON.stringify(sala.posicoes))
+            socket.emit('gameStart', sala.players.length)
+        }
+
+        console.log(sala.players.length)
+        socket.emit('newPlayer', sala.players.length)
+        socket.broadcast.emit('newPlayer', sala.players.length)
+    })
+})
+
+server.listen(3001);*/
+
