@@ -115,7 +115,16 @@ const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
                     sala.posicoes[x_atual][y_atual] = utils.vec_func[0](x_atual, y_atual); // NÃO alterar para pos_atual
                     sala.players[i].socket.emit('died',  JSON.stringify(sala.posicoes));
                     sala.players.splice(i, 1);
+                    utils.derrota(pos_atual.nick, sala.players.length); // Trabalha com os status do player
                     break;
+                }
+            }
+            // Ultimo herói vivo => vence a partida
+            if (sala.players.length == 1){
+                console.log("VENCEDOR:",sala.players[0]);
+                if (sala.players[0].nick === pos_atual.nick ){
+                    sala.players[0].socket.emit('win', JSON.stringify(sala.posicoes));
+                    utils.vitoria(sala.players[0].nick);
                 }
             }
             return 2;
@@ -137,6 +146,7 @@ const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
                     sala.posicoes[x_mov][y_mov] = utils.vec_func[0](x_mov, y_mov); // NÃO trocar para pos_mov
                     sala.players[i].socket.emit('died', JSON.stringify(sala.posicoes));
                     sala.players.splice(i, 1);
+                    utils.derrota(pos_mov.nick, sala.players.length); // Trabalha com os status do player
                 }
             }
             // Ultimo herói vivo => vence a partida
@@ -144,6 +154,7 @@ const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
                 console.log("VENCEDOR:",sala.players[0]);
                 if (sala.players[0].nick === pos_atual.nick ){
                     sala.players[0].socket.emit('win', JSON.stringify(sala.posicoes));
+                    utils.vitoria(pos_atual.nick);
                 }
             }
             return 2;

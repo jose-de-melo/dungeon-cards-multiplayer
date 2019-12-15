@@ -1,5 +1,6 @@
 const Sala = require('./models/sala');
 const Card = require('./models/card');
+const User = require('./models/user');
 
 // Vetores de geração aleatória
 exports.herois = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
@@ -27,7 +28,10 @@ exports.RECOMPENSA_MONSTRO = 5;
 
 // Quando as MOEDAS_GERAL atingirem esse valor o DANO_MONSTRO e VIDA_MOSTRO, são multiplicados pelo valor de CONST_UP
 exports.LIMITE_UPLOAD = 50;
-exports.CONST_UP = 2; 
+exports.CONST_UP = 2;
+
+const PDL_WIN = 2;
+const PDL_LOSE = 1;
 
 exports.randOrd = () => {
     return (Math.round(Math.random())-0.5);
@@ -114,4 +118,21 @@ exports.generateGun = (x, y) =>{
     arma.damage = 0;
     arma.bounty = 0;
     return arma;
+}
+
+exports.vitoria = (name) => {
+    const user = await User.findOne({ name });
+    user.PDL += PDL_WIN;
+    user.vitoria += 1;
+
+    await User.update({_id : user.id}, user);
+}
+
+exports.derrota = (name, posicao) => {
+    const user = await User.findOne({ name });
+
+    user.PDL -= posicao - PDL_LOSE;
+    user.derrota += 1;
+
+    await User.update({_id : user.id}, user);
 }
