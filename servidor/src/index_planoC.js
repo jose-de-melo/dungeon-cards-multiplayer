@@ -302,29 +302,4 @@ app.listen(options.port, function(){
 })
 
 
-/* const server = require('http').createServer();
-const io = require('socket.io')(server);
-
-
-io.on('connection', socket => {
-
-    socket.on('disconnect', () => { console.log("Cliente " + socket.id + " desconectado.") });
-
-    socket.on('pushPlayer', nickname => {
-        console.log("Adicionando o player " + nickname)
-        
-        sala.players.push({nickname: })
-
-        if(sala.players.length == 4){
-            socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-            socket.emit('gameStart', sala.players.length)
-        }
-
-        console.log(sala.players.length)
-        socket.emit('newPlayer', sala.players.length)
-        socket.broadcast.emit('newPlayer', sala.players.length)
-    })
-})
-
-server.listen(3001);*/
 

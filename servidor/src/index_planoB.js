@@ -3,12 +3,17 @@ const options = {
     port: process.env.PORT || 3000
 };
 
-const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('./config/cors')
 const utils = require('./utils')
 const Sala = require('./models/sala');
 const Card = require('./models/card');
+
+
+var app = require('express')();
+var http = require('http').createServer(app);
+var io = require('socket.io')(http);
+require('./controlers/auth_controler')(app);
 
 const sala = new Sala({
     posicoes:[[],[],[],[],[],[]], 
@@ -41,13 +46,8 @@ var herois  = ["androide","barbaro","templario","ninja","ceifadora","elfo","necr
 var armas  = []
 
 
-const app = express();
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
-
-require('./controlers/auth_controler')(app);
-
 
 const cria_monstro = (x, y) =>{
     monster = new Card();
@@ -128,30 +128,8 @@ const vec_func = [cria_moeda,cria_moeda, cria_moeda, cria_moeda, cria_monstro, c
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-    console.log('karai borrachando');
-    return res.send('Karai borracha');
-});
-
-router.post('/join', async (req,res)=> {
-    const { nickname, socket} = req.body;
-
-    //if(!sala) 
-    //   return res.status(400).send({ error: "Sala não cadastrada.", id_sala}) 
-
-    const nplayers = sala.players.length
-    if(nplayers == 4)
-        return res.send({status:400,  error: "Esta sala está cheia."}) 
-
-    sala.players.push({nickname, socket})   
-    
-    console.log("Cadastrando: "+ nickname+ "   Numero de jogadores: "+sala.players.length)
-
-    return res.send({ status: "O player entrou na sala.", num_players: (nplayers+1)})
-});
-
 //Esse é o metodo q vai iniciar a partida
-router.get('/iniciar', async (req, res) => {
+const iniciar = () =>{
     sala.players.sort(randOrd);
     sala.posicoes[1][1] = cria_player(1,1, sala.players[0].nickname)
     sala.posicoes[1][4] = cria_player(1,4, sala.players[1].nickname)  
@@ -168,35 +146,26 @@ router.get('/iniciar', async (req, res) => {
                 console.log(i, j)
             }
         }
-    }
-    
-   
-   
-    // ATUALIZA MATRIZ PRO SOCKET
-    io.emit()
-    return res.send({message: 1}) 
-});
+    } 
+};
 
 //Esse é o metodo q movimenta o jogador
-router.post('/movimento', (req, res) => {
-
-    const { x_atual, y_atual, x_mov, y_mov } = req.body;
-    
+const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
     //Verifica as bordas
     if(x_mov>5)
-        return res.send({ message: 0}) 
+        return 0;
     if(y_mov>5)
-        return res.send({ message: 0}) 
+        return 0;
     if(x_mov<0)
-        return res.send({ message: 0}) 
+        return 0;
     if(y_mov<0)
-        return res.send({ message: 0})
+        return 0;
     
     //Verifica se não andou na diagonal ou mais de 1 casa
     dif_y = Math.abs((y_atual-y_mov))
     dif_x = Math.abs((x_atual-x_mov))
     if(dif_x+dif_y !=1)
-        return res.send({ message: 0})
+        return 0;
 
     //Sempre que a quantidade de moedas coletas atingir 100, o nível dos mosntros recebe 0.
     if (MOEDAS_GERAL == LIMITE_UPLOAD - 1){
@@ -217,7 +186,6 @@ router.post('/movimento', (req, res) => {
     if(sala.posicoes[x_mov][y_mov].tipo == 'arma'){
         if(sala.posicoes[x_atual][y_atual].name == sala.posicoes[x_mov][y_mov].name){
             if( sala.posicoes[x_atual][y_atual].tipo == "heroi_armado"){
-                 console.log("achou a arma mas ja tem");
                  sala.posicoes[x_atual][y_atual].bounty += RECOMPENSA_GUN;
                  MOEDAS_GERAL += RECOMPENSA_GUN;
             }else{
@@ -247,8 +215,8 @@ router.post('/movimento', (req, res) => {
         
         //verifica se o monstro nao morreu
         if(sala.posicoes[x_mov][y_mov].life>0){
-            //se morreu, retorna a matriz
-            return res.send({ matriz: sala.posicoes})
+            //se nao morreu morreu, retorna a matriz
+            return 1
         }
 
         //verifica se o heroi morreu
@@ -257,7 +225,8 @@ router.post('/movimento', (req, res) => {
             sala.posicoes[x_atual][y_atual] = vec_func[0](x_atual, y_atual);
 
             //MORREU TIRA DO SOCKET RPA ELE NAO PODER MAIS MECHER
-            return res.send({ message: 2, matriz: sala.posicoes})
+            //sala.player.remove([x_atual][x_atual].nick) esse codigo sera utilizado
+            return 2
         }
 
         sala.posicoes[x_atual][y_atual].bounty += sala.posicoes[x_mov][y_mov].bounty;
@@ -269,63 +238,64 @@ router.post('/movimento', (req, res) => {
 
         if(sala.posicoes[x_mov][y_mov].life>0){
             //se morreu, retorna a matriz
-            return res.send({ matriz: sala.posicoes})
+            //sala.player.remove([x_mov][y_mov].nick) esse codigo sera utilizado
+
+            return 2
         }
     }    
    
     //a posição que deseja mover recebe o objeto q esta na posição atual.
-    //sala.posicoes[x_mov][y_mov] = 
-    c = new Card();
-    c =  sala.posicoes[x_atual][y_atual];
+    //sala.posicoes[x_mov][y_mov] =  
     x =  parseInt((c.bounty/10)-(c.level));
-    c.damage += x;
-    c.life += (x*2);
-    c.level = parseInt(c.bounty/10);
+    sala.posicoes[x_atual][y_atual].damage += x;
+    sala.posicoes[x_atual][y_atual].life += (x*2);
+    sala.posicoes[x_atual][y_atual].level = parseInt(c.bounty/10);
 
     //atualizou o x e y, do atual pro novo
-    c.x = x_mov;
-    c.y = y_mov;
+    sala.posicoes[x_atual][y_atual].x = x_mov;
+    sala.posicoes[x_atual][y_atual].y = y_mov;
 
-    vec_func.sort(randOrd);
+    sala.posicoes[x_mov][y_mov] = sala.posicoes[x_atual][y_atual];;
+    sala.posicoes[x_atual][y_atual] = vec_func[0]( x_atual, y_atual);
 
-    n = vec_func[0]( x_atual, y_atual)
-    sala.posicoes[x_mov][y_mov] = c;
-    sala.posicoes[x_atual][y_atual] = n;
+    return 1
+}
 
-    return res.send({message: 1, matriz: sala.posicoes})
+io.on('connection', function(socket){
+    console.log('a user connected');
+    socket.on('disconnect', function(){
+      console.log('user disconnected');
+    });
 });
+
 
 app.use(cors);
 app.use(router);
 
-app.listen(options.port, function(){
-    console.log(`Servidor rodando na porta ${options.port}`)
-})
-
-
-const server = require('http').createServer();
-const io = require('socket.io')(server);
-
-
+http.listen(3000, function(){
+    console.log('listening on *:3000');
+});
+  
 io.on('connection', socket => {
+    socket.on('disconnect', () => { 
+        console.log("O player " + socket.id + "desconectou.") 
+    });
 
-    socket.on('disconnect', () => { console.log("Cliente " + socket.id + " desconectado.") });
-
-    socket.on('pushPlayer', nickname => {
-        console.log("Adicionando o player " + nickname)
-        
-        sala.players.push({nickname: })
+    socket.on('entrarSala', nickname => {
+        sala.players.push({nick: {'socket': socket, 'name': nick}})
+       
+        console.log("O player ", nick, "se conectou.")
 
         if(sala.players.length == 4){
-            socket.emit('attMatriz', JSON.stringify(sala.posicoes))
-            socket.emit('gameStart', sala.players.length)
+            iniciar()
+            io.emit('renderizaMatriz', JSON.stringify(sala.posicoes))
+        }else{
+            io.emit('cadastraPlayer', sala.players.length)
         }
+    })
 
-        console.log(sala.players.length)
-        socket.emit('newPlayer', sala.players.length)
-        socket.broadcast.emit('newPlayer', sala.players.length)
+    socket.on('movimentarHeroi', (x_atual, y_atual, x_mov, y_mov, nome_player) => {
+        movimento(x_atual, y_atual, x_mov, y_mov, nome_player)
+        io.emit('renderizaMatriz', JSON.stringify(sala.posicoes))
     })
 })
-
-server.listen(3001);
-
