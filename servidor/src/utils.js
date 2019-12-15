@@ -61,8 +61,8 @@ exports.generatePotions = (x, y) =>{
 }
 
 exports.generatePlayer = (x, y, nick) =>{
-    p = new Card();
     this.herois.sort(this.randOrd);
+    p = new Card();
     p.name = this.herois[0];
     this.armas.push(this.herois[0]);
     p.tipo = "heroi";
