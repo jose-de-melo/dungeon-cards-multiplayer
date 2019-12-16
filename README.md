@@ -35,7 +35,9 @@ Dungeon MMO é um jogo onde quatro jogadores, deverão se enfrentar em 1 dungeon
   
  ### Tecnologias utilizadas
  
- Esses jogo foi desenvolvido utilizando as tecnologias [Socket.io](https://socket.io/), [React Native](https://facebook.github.io/react-native/) e [Node.js](https://nodejs.org/en/)
+ Esses jogo foi desenvolvido utilizando as tecnologias [React Native](https://facebook.github.io/react-native/), [Socket.io](https://socket.io/) e [Node.js](https://nodejs.org/en/)
+![Protótipo](imagens/node_rct_socketio.png)
+ 
  
 [login]: https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/login.jpeg
 [gameplay]: https://raw.githubusercontent.com/jose-de-melo/dungeon-cards-multiplayer/imagens/Dungeons-Sprites/gameplay.mp4
