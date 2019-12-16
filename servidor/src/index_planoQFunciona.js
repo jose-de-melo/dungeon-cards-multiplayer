@@ -134,9 +134,9 @@ const iniciar = () =>{
     sala.players.sort(randOrd);
     herois.sort(randOrd);
     sala.posicoes[1][1] = cria_player(1,1, sala.players[0].nick, 0)
-    sala.posicoes[1][4] = cria_player(1,4, sala.players[1].nick, 1)  
-    //sala.posicoes[4][1] = cria_player(4,1, sala.players[2].nick)  
-    //sala.posicoes[4][4] = cria_player(4,4, sala.players[3].nick)  
+    //sala.posicoes[1][4] = cria_player(1,4, sala.players[1].nick, 1)  
+    //sala.posicoes[4][1] = cria_player(4,1, sala.players[2].nick, 2)  
+    //sala.posicoes[4][4] = cria_player(4,4, sala.players[3].nick, 3)  
 
 
     for(i=0; i<6;i++){ 
@@ -308,7 +308,7 @@ io.on('connection', socket => {
         
         sala.players.push({'nick': nick , 'socket' : socket})
 
-        if(sala.players.length == 2){
+        if(sala.players.length >=1){
             iniciar()
             io.emit('renderizaMatriz', JSON.stringify(sala.posicoes))
         }else{
