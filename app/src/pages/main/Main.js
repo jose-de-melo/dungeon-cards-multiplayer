@@ -9,7 +9,7 @@ import io from "socket.io-client";
 import AsyncStorage from '@react-native-community/async-storage';
 
 const api = axios.create({
-    baseURL: 'http://192.168.0.110:3000',
+    baseURL: 'http://192.168.1.107:3000',
 });
 
 let numberGrid = 3
@@ -54,9 +54,7 @@ export default class App extends Component {
         
         this.iniciar()
 
-        this.socket = io.connect("http://192.168.0.110:3001")
-
-
+        this.socket = io.connect("http://192.168.1.107:3001")
 
         this.socket.on('newPlayer', nPlayers => {
             this.state.players = nPlayers
@@ -183,7 +181,7 @@ export default class App extends Component {
 
     newGame = () => {
         if(this.socket == null)
-            this.socket = io.connect("http://192.168.0.110:3001")
+            this.socket = io.connect("http://192.168.1.107:3001")
         this.state.players = 0
         this.socket.emit('pushPlayer', this.state.nickname)
         this.state.mainPage = false

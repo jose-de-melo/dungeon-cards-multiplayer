@@ -121,7 +121,7 @@ exports.vitoria = async (name) => {
     user.PDL += PDL_WIN;
     user.vitorias += 1;
 
-    await User.update({_id : user.id}, user);
+    await User.updateOne({_id : user.id}, user);
 }
 
 exports.derrota = async (name, posicao) => {
@@ -130,7 +130,7 @@ exports.derrota = async (name, posicao) => {
     user.PDL -= posicao - PDL_LOSE;
     user.derrotas += 1;
 
-    await User.update({_id : user.id}, user);
+    await User.updateOne({_id: user.id}, user)
 }
 
 exports.vec_func = [this.generateCoins, this.generateMonsters, this.generateMonsters, 

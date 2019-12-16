@@ -5,6 +5,7 @@ const options = {
 
 //Imports
 const Card = require('./models/card');
+const User = require('./models/user')
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('./config/cors');
