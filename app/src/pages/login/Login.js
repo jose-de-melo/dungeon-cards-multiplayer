@@ -14,7 +14,7 @@ export default function Login({ navigation }){
         const token = await AsyncStorage.getItem("token")
 
         if(token != null){
-            navigation.navigate("Main2")
+            navigation.navigate("Main")
         }
     }
 
@@ -29,7 +29,6 @@ export default function Login({ navigation }){
     async function handleLogin(){
         Keyboard.dismiss()
 
-        
         await api.post('/users/authenticate', {
              "name": user,
              "password": password
@@ -38,7 +37,7 @@ export default function Login({ navigation }){
             if(response.data.code == 200){
                 const { token, user } = response.data
                 await saveInfo(token, user)
-                navigation.navigate('Main2')
+                navigation.navigate('Main')
             }
           })
         .catch(error => {
