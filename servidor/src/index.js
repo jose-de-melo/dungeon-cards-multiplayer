@@ -4,8 +4,6 @@ const options = {
 };
 
 //Imports
-const Card = require('./models/card');
-const User = require('./models/user')
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('./config/cors');
@@ -186,9 +184,9 @@ async function iniciar(){
     sala.players.sort(utils.randOrd)
     utils.herois.sort(utils.randOrd);
     sala.posicoes[1][1] = utils.generatePlayer(1,1, sala.players[0].nick, 0)
-    sala.posicoes[1][4] = utils.generatePlayer(1,4, sala.players[1].nick, 1)
-    sala.posicoes[4][1] = utils.generatePlayer(4,1, sala.players[2].nick, 2)
-    sala.posicoes[4][4] = utils.generatePlayer(4,4, sala.players[3].nick, 3)
+    //sala.posicoes[1][4] = utils.generatePlayer(1,4, sala.players[1].nick, 1)
+    //sala.posicoes[4][1] = utils.generatePlayer(4,1, sala.players[2].nick, 2)
+    //sala.posicoes[4][4] = utils.generatePlayer(4,4, sala.players[3].nick, 3)
 
     for(i=0; i<6;i++){ 
         for(j=0; j<6;j++){
@@ -229,7 +227,7 @@ io.on('connection', socket => {
         console.log(nick, " entrou na sala !!");
         sala.players.push({'nick': nick , 'socket' : socket});
         console.log(sala.players.length)
-        if(sala.players.length == utils.QTD_PLAYERS){ // Se a sala está cheia => inicia a partida
+        if(sala.players.length == 1){ // Se a sala está cheia => inicia a partida
             iniciar()
             io.emit('renderizaMatriz', JSON.stringify(sala.posicoes))
         }else{ // Senão aguarda demais jogadores
