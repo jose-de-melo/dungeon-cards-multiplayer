@@ -1,9 +1,12 @@
-# Dungeon Cards MMO
+# DungeonCards MMO
 
 [Video gameplay][gameplay]
 
 Trabalho realizado pelos alunos [Gabriel Pereira](https://github.com/GabrielBPereira), [Guilherme Domith](https://github.com/GuilhermeDomith), [José de Melo](https://github.com/jose-de-melo), [Lucas Heber](https://github.com/lucasheber), [Ricardo Costa](https://github.com/Ricardovcn) e [Tarlles Roman](https://github.com/TarllesRoman); para a disciplina de Programação para Dispositívos Móveis e Sem Fio lecionada pelo professor [Rafael Alencar](https://github.com/rafjaa) no IF Sudeste MG - Barbacena em 2019.
 
+<p align="center">
+    <img src="https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/login.jpeg" alt="Login" width="300" style="margin-top:10px;margin-bottom:10px;">
+</p>
 
 ![alt text][login]
 
