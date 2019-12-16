@@ -8,13 +8,12 @@ Trabalho realizado pelos alunos [Gabriel Pereira](https://github.com/GabrielBPer
     <img src="https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/login.jpeg" alt="Login" width="300" style="margin-top:10px;margin-bottom:10px;">
 </p>
 
-![alt text][login]
-
 
 Dungeon MMO é um jogo onde quatro jogadores, deverão se enfrentar em 1 dungeon onde somente 1 sairá vitorioso. Sua dungeon é um tabuleiro 6x6 cheio de monstros e com 3 inimigos poderosos. Mate os monstros, colete moedas e encontre armas, quando se sentir forte o suficiente vá para cima de seus inimigos para coletar parte do seu ouro e ficar mais próximo da vitória.
 
-
-![alt text][matriz]
+<p align="center">
+    <img src="https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/matriz.jpeg" alt="Matriz" width="300" style="margin-top:10px;margin-bottom:10px;">
+</p>
 
 
 ### Como jogar
@@ -33,16 +32,14 @@ Dungeon MMO é um jogo onde quatro jogadores, deverão se enfrentar em 1 dungeon
   - 3º -> perde 1 pontos de liga (PDL).
   - 4º -> perde 2 pontos de liga (PDL).
   
-  
- ![alt text][main]
+<p align="center">
+    <img src="https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/main.jpeg" alt="Main" width="300" style="margin-top:10px;margin-bottom:10px;">
+</p>
   
  ### Tecnologias utilizadas
  
  Esses jogo foi desenvolvido utilizando as tecnologias [React Native](https://facebook.github.io/react-native/), [Socket.io](https://socket.io/) e [Node.js](https://nodejs.org/en/)
+ 
 ![Protótipo](imagens/node_rct_socketio.png)
- 
- 
-[login]: https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/login.jpeg
+
 [gameplay]: https://raw.githubusercontent.com/jose-de-melo/dungeon-cards-multiplayer/imagens/Dungeons-Sprites/gameplay.mp4
-[main]: https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/main.jpeg
-[matriz]: https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/matriz.jpeg
