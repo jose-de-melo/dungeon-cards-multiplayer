@@ -16,10 +16,8 @@ function generateToken(params = {}){
        })
 }
 
-router.get('/infoPlayers/:id', async (req, res) =>{
-
-    console.log(req)
-
+router.get('/getInfoPlayer/:id', async (req, res) =>{
+    //console.log(req)
     const id = req.params.id
 
     console.log("INFO_PLAYER : " + id)
@@ -31,7 +29,7 @@ router.get('/infoPlayers/:id', async (req, res) =>{
             return res.send({ code:45, message: "ID não encontrado"})
 
         res.send({ 
-            user: user, 
+            user: JSON.stringify(user), 
             token: generateToken({id : user.id}),
             code: 200
         });

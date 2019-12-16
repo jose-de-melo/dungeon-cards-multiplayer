@@ -6,11 +6,7 @@ const User = require('./models/user');
 exports.herois = ["androide","barbaro","templario","ninja","ceifadora","elfo","necromante"]
 exports.monstros = ["alien","aranha","cogumelo","esqueleto","javali","medusa","morcego","zumbi"];
 exports.armas  = []
-exports.vec_func = [this.generateCoins, this.generateMonsters, this.generateMonsters, 
-    this.generatePotions, this.generatePotions, this.generatePotions, this.generateGun, 
-    this.generateMonsters, this.generateCoins, this.generateCoins, 
-    this.generateCoins
-   ]
+
 
 // Quantidade de players para o jogo
 exports.QTD_PLAYERS = 4;
@@ -120,19 +116,25 @@ exports.generateGun = (x, y) =>{
     return arma;
 }
 
-exports.vitoria = (name) => {
+exports.vitoria = async (name) => {
     const user = await User.findOne({ name });
     user.PDL += PDL_WIN;
-    user.vitoria += 1;
+    user.vitorias += 1;
 
     await User.update({_id : user.id}, user);
 }
 
-exports.derrota = (name, posicao) => {
+exports.derrota = async (name, posicao) => {
     const user = await User.findOne({ name });
 
     user.PDL -= posicao - PDL_LOSE;
-    user.derrota += 1;
+    user.derrotas += 1;
 
     await User.update({_id : user.id}, user);
 }
+
+exports.vec_func = [this.generateCoins, this.generateMonsters, this.generateMonsters, 
+    this.generatePotions, this.generatePotions, this.generatePotions, this.generateGun, 
+    this.generateMonsters, this.generateCoins, this.generateCoins, 
+    this.generateCoins
+   ]

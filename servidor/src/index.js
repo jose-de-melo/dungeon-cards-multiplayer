@@ -22,7 +22,7 @@ require('./controlers/auth_controler')(app);
 //require('./controlers/sala_controler')(app);
 
 // Criando salas e rotas
-const sala = utils.criarSala();
+var sala = utils.criarSala();
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -69,7 +69,7 @@ const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
     
     // ##################    CURA    
     if(pos_mov.name == 'poção'){
-        pos_atual.life += CURA_POTION;
+        pos_atual.life += utils.CURA_POTION;
     }
 
     // ##################    ARMA
@@ -102,7 +102,7 @@ const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
         pos_atual.life -= sala.posicoes[x_mov][y_mov].damage;
         
         //verifica se o monstro morreu
-        if(pos_mov.life<0){
+        if(pos_mov.life <= 0){
             pos_atual.bounty += pos_mov.bounty;
         }
 
@@ -121,11 +121,11 @@ const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
             }
             // Ultimo herói vivo => vence a partida
             if (sala.players.length == 1){
-                console.log("VENCEDOR:",sala.players[0]);
-                if (sala.players[0].nick === pos_atual.nick ){
-                    sala.players[0].socket.emit('win', JSON.stringify(sala.posicoes));
-                    utils.vitoria(sala.players[0].nick);
-                }
+                console.log("VENCEDOR:",sala.players[0].nick);
+                sala.players[0].socket.emit('win');
+                utils.vitoria(sala.players[0].nick);
+                sala = null
+                sala = utils.criarSala();
             }
             return 2;
         }
@@ -151,11 +151,11 @@ const movimento = (x_atual, y_atual, x_mov, y_mov, nome_player) => {
             }
             // Ultimo herói vivo => vence a partida
             if (sala.players.length == 1){
-                console.log("VENCEDOR:",sala.players[0]);
-                if (sala.players[0].nick === pos_atual.nick ){
-                    sala.players[0].socket.emit('win', JSON.stringify(sala.posicoes));
-                    utils.vitoria(pos_atual.nick);
-                }
+                console.log("VENCEDOR:",sala.players[0].nick);
+                sala.players[0].socket.emit('win');
+                utils.vitoria(sala.players[0].nick);
+                sala = null
+                sala = utils.criarSala()
             }
             return 2;
         }
@@ -206,6 +206,7 @@ router.get('/numberOfPlayersOnRoom', async (req, res) => {
 
 app.use('/game', router);
 app.use(cors);
+
 app.get('/', (req, res) =>{
     res.send('DungeonsDroid');
 });
@@ -225,8 +226,8 @@ io.on('connection', socket => {
     // Quando um player entra na sala
     socket.on('pushPlayer', nick => {
         console.log(nick, " entrou na sala !!");
-
         sala.players.push({'nick': nick , 'socket' : socket});
+        console.log(sala.players.length)
         if(sala.players.length == utils.QTD_PLAYERS){ // Se a sala está cheia => inicia a partida
             iniciar()
             io.emit('renderizaMatriz', JSON.stringify(sala.posicoes))

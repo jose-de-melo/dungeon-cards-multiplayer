@@ -9,7 +9,7 @@ import io from "socket.io-client";
 import AsyncStorage from '@react-native-community/async-storage';
 
 const api = axios.create({
-    baseURL: 'http://192.168.0.3:3000',
+    baseURL: 'http://192.168.0.110:3000',
 });
 
 let numberGrid = 3
@@ -45,14 +45,18 @@ export default class App extends Component {
         loses:0,
         players: 0,
         coins: 0,
-        playersLived: 0
+        playersLived: 0,
+        win: false,
+        died: false
     }
 
-    componentDidMount() {
+    componentDidMount = async () => {
         
         this.iniciar()
 
         this.socket = io.connect("http://192.168.0.110:3001")
+
+
 
         this.socket.on('newPlayer', nPlayers => {
             this.state.players = nPlayers
@@ -67,28 +71,69 @@ export default class App extends Component {
             this.renderizarMatriz(JSON.parse(matriz))
         });
 
+        this.socket.on('win', async () => {
+            this.state.win = true
+            this.state.gameOn = false
+            this.state.playersLived = 0
+            this.setState(this.state)
+            this.socket.close()
+            this.socket = null
+            await this.attInfo()
+        })
+
         this.socket.on('invalidMove', message => {
             Toast(message)
         })
 
-        this.socket.on("died", matriz => {
-            alert("Você Morreu!")
+        this.socket.on("died", async (matriz) => {
+            this.state.died = true
+            this.state.gameOn = false
+            this.state.playersLived = 0
+            this.setState(this.state)
             this.renderizarMatriz(JSON.parse(matriz))
             this.socket.close()
+            this.socket = null
+            await this.attInfo()
         });
     }
 
+    attInfo = async () => {
+        var us = await AsyncStorage.getItem("user")
+        us = JSON.parse(us)
+
+        await api.get(`/users/getInfoPlayer/${us._id}`).
+        then(async (response) => {
+            if(response.data.code == 200){
+                const { user } = response.data
+                us = JSON.parse(user)
+                await AsyncStorage.setItem("user", user)
+            }
+          })
+        .catch(error => {
+            alert(error)
+        })
+
+        this.state.nickname = us.name
+        this.state.pdl = us.PDL
+        this.state.wins = us.vitorias
+        this.state.loses = us.derrotas
+        this.setState(this.state)
+    }
+
     iniciar = async () => {
-        var user = await AsyncStorage.getItem("user")
-        user = JSON.parse(user)
-        this.state.nickname = user.name
-        this.state.pdl = user.PDL
-        this.state.wins = user.vitorias
-        this.state.loses = user.derrotas
+        var us = await AsyncStorage.getItem("user")
+        us = JSON.parse(us)
+
+        this.state.nickname = us.name
+        this.state.pdl = us.PDL
+        this.state.wins = us.vitorias
+        this.state.loses = us.derrotas
         this.setState(this.state)
     }
 
     renderizarMatriz = (matriz) => {
+        this.state.playersLived = 0
+        this.setState(this.state)
         for (var i = 0; i < matriz.length; i++) {
             for (var j = 0; j < matriz[i].length; j++) {
                 let item = matriz[i][j]
@@ -97,8 +142,14 @@ export default class App extends Component {
                     player_x = item.x
                     player_y = item.y
                 }
+
+                if(item.tipo === 'heroi' || item.tipo === 'heroi_armado'){
+                    this.state.playersLived+=1
+                }
             }
         }
+
+        this.setState(this.state)
 
         // Encontrar x e y a ser exibido no FlatList
         let x_view = 0
@@ -131,6 +182,8 @@ export default class App extends Component {
     }
 
     newGame = () => {
+        if(this.socket == null)
+            this.socket = io.connect("http://192.168.0.110:3001")
         this.socket.emit('pushPlayer', this.state.nickname)
         this.state.mainPage = false
         this.setState(this.state)
@@ -233,10 +286,35 @@ export default class App extends Component {
         </View>
     }
 
+    backToMain = () => {
+        this.state.win = false
+        this.state.died = false
+        this.state.mainPage = true
+        this.state.gameOn = false
+        this.setState(this.state)
+    }
+
+    renderWinLose = (message) => {
+        return <View>
+                    <Text>{message}</Text>
+                    <TouchableOpacity onPress={this.backToMain}>
+                        <Text>MAIN</Text>
+                    </TouchableOpacity>
+               </View>
+    }
+
     render() {
-        console.log(this.state.mainPage)
+        //console.log(this.state.mainPage)
         if(this.state.mainPage){
             return this.renderMainPage()
+        }
+
+        if(this.state.died){
+            return this.renderWinLose("You lose!")
+        }
+
+        if(this.state.win){
+            return this.renderWinLose("You win!")
         }
 
         if(this.state.gameOn){
