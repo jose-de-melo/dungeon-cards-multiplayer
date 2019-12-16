@@ -22,22 +22,21 @@ export default function Login({ navigation }){
 
     async function saveInfo(token, user) {
         await AsyncStorage.setItem("token", "Bearer " + token)
-        await AsyncStorage.setItem("id", user._id)
+        await AsyncStorage.setItem("user", JSON.stringify(user))
     }
 
 
     async function handleLogin(){
         Keyboard.dismiss()
 
-        
-        await api.post('/users/authenticate',{
+        await api.post('/users/authenticate', {
              "name": user,
              "password": password
         })
-        .then(response => {
+        .then(async (response) => {
             if(response.data.code == 200){
                 const { token, user } = response.data
-                saveInfo(token, user)
+                await saveInfo(token, user)
                 navigation.navigate('Main')
             }
           })
