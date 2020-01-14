@@ -16,7 +16,7 @@ Dungeon MMO é um jogo onde quatro jogadores, deverão se enfrentar em 1 dungeon
 </p>
 
 
-### Como jogar
+## Como jogar
 
 - Após realizar o login clique no botão `Play` para ser direcionado para uma sala. Quando 4 jogadores estiverem na mesma sala o jogo irá começar automaticamente.
 - O jogador irá realizar movimentos em concorrencia com seus inimigos.
@@ -33,10 +33,10 @@ Dungeon MMO é um jogo onde quatro jogadores, deverão se enfrentar em 1 dungeon
   - 4º -> perde 2 pontos de liga (PDL).
   
 <p align="center">
-    <img src="https://raw.githubusercontent.com/jose-de-melo/dungeon-cards-multiplayer/imagens/Dungeons-Sprites/main.jpeg" alt="Main" width="300" style="margin-top:10px;margin-bottom:10px;">
+    <img src="https://raw.githubusercontent.com/jose-de-melo/dungeon-cards-multiplayer/imagens/Dungeons-Sprites/main.jpeg" alt="Main"       width="300" style="margin-top:10px;margin-bottom:10px;">
 </p>
   
- ### Tecnologias utilizadas
+ ## Tecnologias utilizadas
  
  Esses jogo foi desenvolvido utilizando as tecnologias [React Native](https://facebook.github.io/react-native/), [Socket.io](https://socket.io/) e [Node.js](https://nodejs.org/en/)
  
