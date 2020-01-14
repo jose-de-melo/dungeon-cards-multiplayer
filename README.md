@@ -5,14 +5,14 @@
 Trabalho realizado pelos alunos [Gabriel Pereira](https://github.com/GabrielBPereira), [Guilherme Domith](https://github.com/GuilhermeDomith), [José de Melo](https://github.com/jose-de-melo), [Lucas Heber](https://github.com/lucasheber), [Ricardo Costa](https://github.com/Ricardovcn) e [Tarlles Roman](https://github.com/TarllesRoman); para a disciplina de Programação para Dispositívos Móveis e Sem Fio lecionada pelo professor [Rafael Alencar](https://github.com/rafjaa) no IF Sudeste MG - Barbacena em 2019.
 
 <p align="center">
-    <img src="https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/login.jpeg" alt="Login" width="300" style="margin-top:10px;margin-bottom:10px;">
+    <img src="https://raw.githubusercontent.com/jose-de-melo/dungeon-cards-multiplayer/imagens/Dungeons-Sprites/login.jpeg" alt="Login" width="300" style="margin-top:10px;margin-bottom:10px;">
 </p>
 
 
 Dungeon MMO é um jogo onde quatro jogadores, deverão se enfrentar em 1 dungeon onde somente 1 sairá vitorioso. Sua dungeon é um tabuleiro 6x6 cheio de monstros e com 3 inimigos poderosos. Mate os monstros, colete moedas e encontre armas, quando se sentir forte o suficiente vá para cima de seus inimigos para coletar parte do seu ouro e ficar mais próximo da vitória.
 
 <p align="center">
-    <img src="https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/matriz.jpeg" alt="Matriz" width="300" style="margin-top:10px;margin-bottom:10px;">
+    <img src="https://raw.githubusercontent.com/jose-de-melo/dungeon-cards-multiplayer/imagens/Dungeons-Sprites/matriz.jpeg" alt="Matriz" width="300" style="margin-top:10px;margin-bottom:10px;">
 </p>
 
 
@@ -33,7 +33,7 @@ Dungeon MMO é um jogo onde quatro jogadores, deverão se enfrentar em 1 dungeon
   - 4º -> perde 2 pontos de liga (PDL).
   
 <p align="center">
-    <img src="https://github.com/jose-de-melo/dungeon-cards-multiplayer/blob/imagens/Dungeons-Sprites/main.jpeg" alt="Main" width="300" style="margin-top:10px;margin-bottom:10px;">
+    <img src="https://raw.githubusercontent.com/jose-de-melo/dungeon-cards-multiplayer/imagens/Dungeons-Sprites/main.jpeg" alt="Main" width="300" style="margin-top:10px;margin-bottom:10px;">
 </p>
   
  ### Tecnologias utilizadas
